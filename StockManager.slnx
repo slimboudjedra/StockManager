@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="StockManager.Tests/StockManager.Tests.csproj" />
   <Project Path="StockManager/StockManager.csproj" />
 </Solution>
