@@ -18,10 +18,6 @@ namespace StockManager.Models
         [StringLength(100)]
         public string? Description { get; set; }
 
-        [Required]
-        [StringLength(80)]
-        public string Category { get; set; } = string.Empty;
-
         [Range(0, int.MaxValue)]
         public int Quantity { get; set; }
 
@@ -36,5 +32,10 @@ namespace StockManager.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public bool IsArchived { get; set; } = false;
+        public Category Category { get; set; } = null!;
+        public int CategoryId { get; set; }
+
+        [Timestamp]
+        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
     }
 }

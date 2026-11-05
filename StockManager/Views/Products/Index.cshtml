@@ -1,22 +1,39 @@
-@model IEnumerable<Product>
+@using StockManager.ViewModels
+@model ProductIndexViewModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Produktübersicht";
 }
 
-<h1>Index</h1>
+<h1>Produktübersicht</h1>
+
+@if (Model.LowStockCount > 0)
+{
+    <div class="alert alert-warning" role="alert">
+        <strong>Hinweis:</strong>
+        @Model.LowStockCount Produkt(e) haben einen niedrigen Lagerbestand
+        und müssen überprüft werden.
+    </div>
+}
+else
+{
+    <div class="alert alert-success" role="status">
+        Alle Produkte haben einen ausreichenden Lagerbestand.
+    </div>
+}
 
 <p>
-    <a asp-action="Create">Neuer Artikel</a>
+    <a asp-action="Create" class="btn btn-primary">Neuer Artikel</a>
 </p>
 
 <form asp-action="Index" method="get" class="mb-3">
+    <input type="hidden" name="lowStockOnly" value="@Model.LowStockOnly.ToString().ToLower()" />
     <div class="input-group">
         <input type="text"
                name="searchString"
-               value="@ViewData["CurrentFilter"]"
+               value="@Model.SearchString"
                class="form-control"
-               placeholder="Nach Name oder Artikelnummer suchen...." />
+               placeholder="Nach Name oder Artikelnummer suchen..." />
 
         <button type="submit" class="btn btn-primary">
             Suchen
@@ -28,55 +45,48 @@
     </div>
 </form>
 
+<div class="mb-3 d-flex align-items-center gap-2">
+    <a asp-action="Index"
+       asp-route-searchString="@Model.SearchString"
+       asp-route-lowStockOnly="@(!Model.LowStockOnly)"
+       class="text-secondary"
+       title="Lagerbestandsfilter umschalten"
+       aria-label="Lagerbestandsfilter umschalten">
+        <i data-lucide="@(Model.LowStockOnly ? "toggle-right" : "toggle-left")"
+           width="32"
+           height="32"></i>
+    </a>
+
+    <small class="text-muted">
+        @(Model.LowStockOnly
+            ? "Alle Produkte anzeigen"
+            : "Nur Produkte mit niedrigem Lagerbestand anzeigen")
+    </small>
+</div>
+
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Reference)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Quantity)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MinimumStock)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UnitPrice)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsArchived)
-            </th>
+            <th>Referenz</th>
+            <th>Produktname</th>
+            <th>Beschreibung</th>
+            <th>Kategorie</th>
+            <th>Bestand</th>
+            <th>Mindestbestand</th>
+            <th>Einzelpreis</th>
+            <th>Erstellt am</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(model => item.Reference)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Category)
-            </td>
-            <td>
+        @foreach (var item in Model.Products)
+        {
+            <tr>
+                <td>@item.Reference</td>
+                <td>@item.Name</td>
+                <td>@item.Description</td>
+                <td>@item.Category?.Name</td>
+                <td>
                     @if (item.Quantity <= item.MinimumStock)
                     {
                         <span class="badge bg-danger">
@@ -89,65 +99,57 @@
                             @item.Quantity — Auf Lager
                         </span>
                     }
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.MinimumStock)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.UnitPrice)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.IsArchived)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Bearbeiten</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Löschen</a>
-            </td>
-        </tr>
-}
+                </td>
+                <td>@item.MinimumStock</td>
+                <td>@item.UnitPrice.ToString("N2")</td>
+                <td>@item.CreatedAt.ToLocalTime().ToString("g")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Bearbeiten</a> 
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> 
+                    <a asp-action="Delete" asp-route-id="@item.Id">Löschen</a>
+ |                  <a asp-controller="StockMovements" asp-action="Create" asp-route-productId="@item.Id">
+                        Bestand buchen
+                    </a>
+                    <a asp-controller="StockMovements" asp-action="Index" asp-route-productId="@item.Id">Historie</a>     
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
 
-@{
-    int currentPage = (int)ViewData["CurrentPage"]!;
-    int totalPages = (int)ViewData["TotalPages"]!;
-    string? currentFilter = ViewData["CurrentFilter"] as string;
-}
-
-@if (totalPages > 1)
+@if (Model.TotalPages > 1)
 {
     <nav aria-label="Seitennavigation">
         <ul class="pagination">
-            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+            <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
                 <a class="page-link"
                    asp-action="Index"
-                   asp-route-page="@(currentPage - 1)"
-                   asp-route-searchString="@currentFilter">
+                   asp-route-page="@(Model.CurrentPage - 1)"
+                   asp-route-searchString="@Model.SearchString"
+                   asp-route-lowStockOnly="@Model.LowStockOnly">
                     Zurück
                 </a>
             </li>
 
-            @for (int i = 1; i <= totalPages; i++)
+            @for (int i = 1; i <= Model.TotalPages; i++)
             {
-                <li class="page-item @(i == currentPage ? "active" : "")">
+                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
                     <a class="page-link"
                        asp-action="Index"
                        asp-route-page="@i"
-                       asp-route-searchString="@currentFilter">
+                       asp-route-searchString="@Model.SearchString"
+                       asp-route-lowStockOnly="@Model.LowStockOnly">
                         @i
                     </a>
                 </li>
             }
 
-            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+            <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
                 <a class="page-link"
                    asp-action="Index"
-                   asp-route-page="@(currentPage + 1)"
-                   asp-route-searchString="@currentFilter">
+                   asp-route-page="@(Model.CurrentPage + 1)"
+                   asp-route-searchString="@Model.SearchString"
+                   asp-route-lowStockOnly="@Model.LowStockOnly">
                     Nächste
                 </a>
             </li>

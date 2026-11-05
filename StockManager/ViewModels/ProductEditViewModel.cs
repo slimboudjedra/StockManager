@@ -1,5 +1,6 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace StockManager.ViewModels
 {
@@ -8,23 +9,22 @@ namespace StockManager.ViewModels
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Die Angabe der Referenznummer ist obligatorisch.")]
-        [StringLength(50)]
+        [StringLength(50, ErrorMessage = "Die Referenz darf maximal 50 Zeichen lang sein.")]
         [Display(Name = "Referenz")]
         public string Reference { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Die Angabe des Produktnamens ist obligatorisch.")]
-        [StringLength(150)]
+        [StringLength(150, ErrorMessage = "Der Produktnamen darf maximal 150 Zeichen lang sein.")]
         [Display(Name = "Produktname")]
         public string Name { get; set; } = string.Empty;
 
-        [StringLength(100)]
+        [StringLength(100, ErrorMessage = "Die Beschreibung darf maximal 100 Zeichen lang sein.")]
         [Display(Name = "Beschreibung")]
         public string? Description { get; set; }
 
-        [Required(ErrorMessage = "Die Angabe der Kategorie ist obligatorisch.")]
-        [StringLength(80)]
+        [Range(1, int.MaxValue, ErrorMessage = "Bitte wählen Sie eine Kategorie aus.")]
         [Display(Name = "Kategorie")]
-        public string Category { get; set; } = string.Empty;
+        public int CategoryId { get; set; }
 
         [Range(0, int.MaxValue,
             ErrorMessage = "Der Mindestbestand muss positiv oder null sein.")]
@@ -36,5 +36,7 @@ namespace StockManager.ViewModels
             ErrorMessage = "Der Preis muss positiv oder null sein.")]
         [Display(Name = "Einzelpreis")]
         public decimal UnitPrice { get; set; }
+
+        public IEnumerable<SelectListItem> Categories { get; set; } = new List<SelectListItem>();
     }
 }
