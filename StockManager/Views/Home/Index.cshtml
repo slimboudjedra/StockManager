@@ -1,9 +1,331 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using StockManager.Models
+@model StockManager.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Übersicht";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-fluid py-4">
+
+    <!-- Seitenkopf -->
+    <div class="mb-4">
+        <span class="text-primary fw-semibold small text-uppercase">
+            STOCKMANAGER
+        </span>
+        <h1 class="display-6 fw-bold mb-2">Lagerübersicht</h1>
+        <p class="text-secondary mb-0">
+            Behalten Sie Ihren Lagerbestand und Ihre Aktivitäten im Überblick.
+        </p>
+    </div>
+
+    <!-- Statistik-Karten -->
+    <div class="row g-3 mb-5">
+
+        <!-- Aktive Produkte -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-secondary fw-medium">Aktive Produkte</span>
+                        <span class="bg-primary bg-opacity-10 text-primary rounded-3 p-2">
+                            <i data-lucide="package"></i>
+                        </span>
+                    </div>
+
+                    <div class="display-6 fw-bold mb-3">
+                        @Model.ActiveProductCount
+                    </div>
+
+                    <a asp-controller="Products"
+                       asp-action="Index"
+                       class="text-decoration-none small fw-semibold">
+                        Alle Produkte anzeigen
+                        <i data-lucide="arrow-up-right" class="ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kategorien -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-secondary fw-medium">Kategorien</span>
+                        <span class="bg-info bg-opacity-10 text-info rounded-3 p-2">
+                            <i data-lucide="layers"></i>
+                        </span>
+                    </div>
+
+                    <div class="display-6 fw-bold mb-3">
+                        @Model.CategoryCount
+                    </div>
+
+                    <a asp-controller="Categories"
+                       asp-action="Index"
+                       class="text-decoration-none small fw-semibold">
+                        Alle Kategorien anzeigen
+                        <i data-lucide="arrow-up-right" class="ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lagerwert -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-secondary fw-medium">Lagerwert</span>
+                        <span class="bg-success bg-opacity-10 text-success rounded-3 p-2">
+                            <i data-lucide="wallet"></i>
+                        </span>
+                    </div>
+
+                    <div class="fs-2 fw-bold mb-3 text-break">
+                         @Model.TotalStockValue.ToString(
+                            "N2",
+                            System.Globalization.CultureInfo.GetCultureInfo("de-DE")
+                        ) €
+                    </div>
+
+                    <span class="text-secondary small">
+                        Bestand × Stückpreis
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Niedriger Lagerbestand -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100 border-0 shadow-sm
+                @(Model.LowStockCount > 0 ? "border-start border-4 border-warning" : "border-start border-4 border-success")">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-secondary fw-medium">Unter Mindestbestand</span>
+
+                        <span class="@(Model.LowStockCount > 0
+                                                                      ? "bg-warning bg-opacity-10 text-warning"
+                                                                      : "bg-success bg-opacity-10 text-success") rounded-3 p-2">
+                            <i data-lucide="@(Model.LowStockCount > 0 ? "alert-triangle" : "check-circle")"></i>
+                        </span>
+                    </div>
+
+                    <div class="display-6 fw-bold mb-3">
+                        @Model.LowStockCount
+                    </div>
+
+                    <a asp-controller="Products"
+                       asp-action="Index"
+                       asp-route-lowStockOnly="true"
+                       class="text-decoration-none small fw-semibold">
+                        Bestände überprüfen
+                        <i data-lucide="arrow-up-right" class="ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Produkte mit niedrigem Bestand -->
+    <section class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white border-bottom py-3 px-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h2 class="h5 fw-bold mb-1">
+                        <i data-lucide="alert-circle" class="text-warning me-2"></i>
+                        Produkte mit niedrigem Bestand
+                    </h2>
+                    <p class="text-secondary small mb-0">
+                        Produkte, deren Bestand den Mindestbestand erreicht oder unterschritten hat.
+                    </p>
+                </div>
+
+                <span class="badge rounded-pill bg-warning text-dark fs-6">
+                    @Model.LowStockCount
+                </span>
+            </div>
+        </div>
+
+        @if (!Model.LowStockProducts.Any())
+        {
+            <div class="card-body text-center py-5">
+                <i data-lucide="check-circle" class="text-success mb-3" style="width:40px;height:40px;"></i>
+                <h3 class="h5 fw-semibold">Alles in Ordnung!</h3>
+                <p class="text-secondary mb-0">
+                    Alle Produkte haben einen ausreichenden Lagerbestand.
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Artikelnummer</th>
+                            <th>Produktname</th>
+                            <th>Aktueller Bestand</th>
+                            <th>Mindestbestand</th>
+                            <th class="text-end pe-4">Aktionen</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var product in Model.LowStockProducts)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="fw-semibold text-secondary">
+                                        @product.Reference
+                                    </span>
+                                </td>
+
+                                <td class="fw-semibold">
+                                    @product.Name
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-danger rounded-pill px-3 py-2">
+                                        @product.Quantity
+                                    </span>
+                                </td>
+
+                                <td>
+                                    @product.MinimumStock
+                                </td>
+
+                                <td class="text-end pe-4">
+                                    <a asp-controller="StockMovements"
+                                       asp-action="Create"
+                                       asp-route-productId="@product.Id"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i data-lucide="plus-circle" class="me-1"></i>
+                                        Bestand buchen
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+    </section>
+
+    <!-- Letzte Lagerbewegungen -->
+    <section class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white border-bottom py-3 px-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h2 class="h5 fw-bold mb-1">
+                        <i data-lucide="history" class="text-primary me-2"></i>
+                        Letzte Lagerbewegungen
+                    </h2>
+                    <p class="text-secondary small mb-0">
+                        Die zuletzt erfassten Bestandsänderungen.
+                    </p>
+                </div>
+
+                <span class="badge rounded-pill bg-primary fs-6">
+                    @Model.RecentMovements.Count()
+                </span>
+            </div>
+        </div>
+
+        @if (!Model.RecentMovements.Any())
+        {
+            <div class="card-body text-center py-5">
+                <i data-lucide="clipboard-list" class="text-secondary mb-3" style="width:40px;height:40px;"></i>
+                <h3 class="h5 fw-semibold">Noch keine Aktivitäten</h3>
+                <p class="text-secondary mb-0">
+                    Es wurden noch keine Lagerbewegungen gebucht.
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Datum</th>
+                            <th>Produkt</th>
+                            <th>Bewegungsart</th>
+                            <th>Mengenänderung</th>
+                            <th class="pe-4">Bestand danach</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var movement in Model.RecentMovements)
+                        {
+                            <tr>
+                                <td class="ps-4 text-secondary small">
+                                    @movement.CreatedAt.ToLocalTime().ToString("g")
+                                </td>
+
+                                <td>
+                                    <a asp-controller="StockMovements"
+                                       asp-action="Index"
+                                       asp-route-productId="@movement.ProductId"
+                                       class="text-decoration-none fw-semibold">
+                                        @movement.ProductName
+                                    </a>
+
+                                    <div class="text-secondary small">
+                                        @movement.ProductReference
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        @movement.MovementType.GetDisplayName()
+                                    </span>
+                                </td>
+
+                                <td>
+                                    @if (movement.QuantityChange > 0)
+                                    {
+                                        <span class="text-success fw-semibold">
+                                            +@movement.QuantityChange
+                                        </span>
+                                    }
+                                    else if (movement.QuantityChange < 0)
+                                    {
+                                        <span class="text-danger fw-semibold">
+                                            @movement.QuantityChange
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-secondary fw-semibold">
+                                            0
+                                        </span>
+                                    }
+                                </td>
+
+                                <td class="pe-4 fw-semibold">
+                                    @movement.QuantityAfter
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+    </section>
+
 </div>
-<a asp-action="Index" asp-controller="Products" class="btn btn-primary">View Products</a>
+
+@section Scripts {
+    <script>
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    </script>
+}
