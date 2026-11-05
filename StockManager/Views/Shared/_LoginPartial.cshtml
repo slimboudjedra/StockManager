@@ -1,0 +1,7 @@
+﻿@if (User.Identity?.IsAuthenticated == true)
+{
+    <form asp-controller="Account" asp-action="Logout" method="post" class="d-flex align-items-center gap-2 ms-auto">
+        <span class="navbar-text">@User.Identity.Name</span>
+        <button type="submit" class="btn btn-outline-secondary btn-sm">Abmelden</button>
+    </form>
+}
