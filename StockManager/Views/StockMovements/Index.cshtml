@@ -1,0 +1,97 @@
+﻿@using StockManager.Models
+@model StockManager.ViewModels.StockMovementHistoryViewModel
+
+@{
+    ViewData["Title"] = "Bestandshistorie";
+}
+
+<h1>Bestandshistorie</h1>
+
+@if (TempData["SuccessMessage"] is string message)
+{
+    <div class="alert alert-success" role="status">@message</div>
+}
+
+<h4>
+    @Model.ProductName
+    <small class="text-muted">(@Model.ProductReference)</small>
+</h4>
+<p>
+    Aktueller Bestand: <strong>@Model.CurrentQuantity</strong>
+    &middot; @Model.TotalMovements Bewegung(en)
+</p>
+
+<p>
+    <a asp-action="Create" asp-route-productId="@Model.ProductId" class="btn btn-primary">Bestand buchen</a>
+    <a asp-controller="Products" asp-action="Details" asp-route-id="@Model.ProductId" class="btn btn-secondary">Zurück zum Produkt</a>
+</p>
+
+@if (!Model.Movements.Any())
+{
+    <p class="text-muted">Für dieses Produkt wurden noch keine Bewegungen gebucht.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Datum</th>
+                <th>Art</th>
+                <th>Änderung</th>
+                <th>Bestand danach</th>
+                <th>Kommentar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var movement in Model.Movements)
+            {
+                <tr>
+                    <td>@movement.CreatedAt.ToLocalTime().ToString("g")</td>
+                    <td>@movement.MovementType.GetDisplayName()</td>
+                    <td class="@(movement.QuantityChange > 0 ? "text-success" : "text-danger")">
+                        @(movement.QuantityChange > 0 ? "+" : "")@movement.QuantityChange
+                    </td>
+                    <td>@movement.QuantityAfter</td>
+                    <td>@movement.Comment</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Seitennavigation">
+        <ul class="pagination">
+            <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-productId="@Model.ProductId"
+                   asp-route-page="@(Model.CurrentPage - 1)">
+                    Zurück
+                </a>
+            </li>
+
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-productId="@Model.ProductId"
+                       asp-route-page="@i">
+                        @i
+                    </a>
+                </li>
+            }
+
+            <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-productId="@Model.ProductId"
+                   asp-route-page="@(Model.CurrentPage + 1)">
+                    Nächste
+                </a>
+            </li>
+        </ul>
+    </nav>
+}
