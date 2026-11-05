@@ -1,188 +1,197 @@
-
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using StockManager.Models;
-using StockManager.Data;
+using StockManager.Services;
 using StockManager.ViewModels;
 
-public class ProductsController : Controller
+namespace StockManager.Controllers
 {
-    private readonly ApplicationDbContext _context;
-
-    public ProductsController(ApplicationDbContext context)
+    public class ProductsController : Controller
     {
-        _context = context;
-    }
+        private const string DuplicateReferenceMessage = "Diese Referenz wird bereits verwendet.";
 
-    // GET: PRODUCTS
+        private readonly ProductService _productService;
 
-    public async Task<IActionResult> Index(string? searchString, int page = 1)
-    {
-        const int pageSize = 10;
-
-        var products = _context.Products
-            .Where(p => !p.IsArchived);
-
-        if (!string.IsNullOrWhiteSpace(searchString))
+        public ProductsController(ProductService productService)
         {
-            products = products.Where(p =>
-                p.Name.Contains(searchString) ||
-                p.Reference.Contains(searchString));
+            _productService = productService;
         }
 
-        ViewData["CurrentFilter"] = searchString;
-
-        var totalProducts = await products.CountAsync();
-
-        var totalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
-
-        if (totalPages > 0)
+        // GET: Products
+        public async Task<IActionResult> Index(string? searchString, int page = 1, bool lowStockOnly = false)
         {
-            page = Math.Clamp(page, 1, totalPages);
-        }
-        else
-        {
-            page = 1;
+            var viewModel = await _productService.GetProductsAsync(searchString, page, lowStockOnly);
+            return View(viewModel);
         }
 
-        var productList = await products
-            .OrderBy(p => p.Name)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-
-        ViewData["CurrentPage"] = page;
-        ViewData["TotalPages"] = totalPages;
-
-        return View(productList);
-    }
-
-
-    // GET: PRODUCTS/Details/5
-    public async Task<IActionResult> Details(int? id)
-    {
-        if (id == null)
+        // GET: Products/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
-            return NotFound();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _productService.GetProductByIdAsync(id.Value);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return View(product);
         }
 
-        var product = await _context.Products
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (product == null)
+        // GET: Products/Create
+        public async Task<IActionResult> Create()
         {
-            return NotFound();
+            var viewModel = new ProductEditViewModel();
+            await PopulateCategoriesAsync(viewModel);
+            return View(viewModel);
         }
 
-        return View(product);
-    }
-
-    // GET: PRODUCTS/Create
-    public IActionResult Create()
-    {
-        return View();
-    }
-
-    // POST: PRODUCTS/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,Reference,Name,Description,Category,Quantity,MinimumStock,UnitPrice,CreatedAt,IsArchived")] Product product)
-    {
-        if (ModelState.IsValid)
+        // POST: Products/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(ProductEditViewModel input)
         {
-            _context.Add(product);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-        return View(product);
-    }
+            if (ModelState.IsValid)
+            {
+                if (await _productService.ReferenceExistsAsync(input.Reference))
+                {
+                    ModelState.AddModelError(nameof(input.Reference), DuplicateReferenceMessage);
+                }
+                else
+                {
+                    try
+                    {
+                        await _productService.CreateProductAsync(input);
+                        return RedirectToAction(nameof(Index));
+                    }
+                    catch (DbUpdateException ex) when (IsDuplicateKey(ex))
+                    {
+                        ModelState.AddModelError(nameof(input.Reference), DuplicateReferenceMessage);
+                    }
+                    catch (ArgumentException ex) when (ex.ParamName == nameof(input.CategoryId))
+                    {
+                        ModelState.AddModelError(nameof(input.CategoryId), ex.Message);
+                    }
+                }
+            }
 
-    // GET: PRODUCTS/Edit/5
-    public async Task<IActionResult> Edit(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
-
-        var product = await _context.Products.FindAsync(id);
-        if (product == null)
-        {
-            return NotFound();
-        }
-        return View(product);
-    }
-
-    // POST: PRODUCTS/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Product input)
-    {
-        if(id != input.Id)
-        {
-            return NotFound();
-        }
-
-        var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id && !p.IsArchived);
-
-        if (product == null)
-        {
-            return NotFound();
-        }
-        if(!ModelState.IsValid)
-        {
+            await PopulateCategoriesAsync(input);
             return View(input);
         }
 
-        product.Reference = input.Reference;
-        product.Name = input.Name;
-        product.Description = input.Description;
-        product.Category = input.Category;
-        product.MinimumStock = input.MinimumStock;
-        product.UnitPrice = input.UnitPrice;
-        
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
-    }
-
-    // GET: PRODUCTS/Delete/5
-    public async Task<IActionResult> Delete(int? id)
-    {
-        if (id == null)
+        // GET: Products/Edit/5
+        public async Task<IActionResult> Edit(int? id)
         {
-            return NotFound();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = await _productService.GetProductForEditAsync(id.Value);
+            if (viewModel == null)
+            {
+                return NotFound();
+            }
+
+            await PopulateCategoriesAsync(viewModel);
+            return View(viewModel);
         }
 
-        var product = await _context.Products
-            .FirstOrDefaultAsync(m => m.Id == id);
-        if (product == null)
+        // POST: Products/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, ProductEditViewModel input)
         {
-            return NotFound();
+            if (id != input.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                if (await _productService.ReferenceExistsAsync(input.Reference, id))
+                {
+                    ModelState.AddModelError(nameof(input.Reference), DuplicateReferenceMessage);
+                }
+                else
+                {
+                    try
+                    {
+                        var updated = await _productService.UpdateProductAsync(id, input);
+                        if (!updated)
+                        {
+                            return NotFound();
+                        }
+
+                        return RedirectToAction(nameof(Index));
+                    }
+                    catch (DbUpdateException ex) when (IsDuplicateKey(ex))
+                    {
+                        ModelState.AddModelError(nameof(input.Reference), DuplicateReferenceMessage);
+                    }
+                    catch (ArgumentException ex) when (ex.ParamName == nameof(input.CategoryId))
+                    {
+                        ModelState.AddModelError(nameof(input.CategoryId), ex.Message);
+                    }
+                }
+            }
+
+            await PopulateCategoriesAsync(input);
+            return View(input);
         }
 
-        return View(product);
-    }
-
-    // POST: PRODUCTS/Delete/5
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int? id)
-    {
-        var product = await _context.Products.FindAsync(id);
-        if (product != null)
+        // GET: Products/Delete/5
+        public async Task<IActionResult> Delete(int? id)
         {
-            _context.Products.Remove(product);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _productService.GetProductByIdAsync(id.Value);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return View(product);
         }
 
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
-    }
+        // POST: Products/Delete/5  (archiviert das Produkt, löscht es nicht)
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var archived = await _productService.ArchiveProductAsync(id);
+            if (!archived)
+            {
+                return NotFound();
+            }
 
-    private bool ProductExists(int? id)
-    {
-        return _context.Products.Any(e => e.Id == id);
+            return RedirectToAction(nameof(Index));
+        }
+
+        //---------------------------------------------------------------------------------------------------------//
+
+        private async Task PopulateCategoriesAsync(ProductEditViewModel viewModel)
+        {
+            var categories = await _productService.GetCategoriesAsync();
+
+            viewModel.Categories = categories
+                .Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = c.Name,
+                    Selected = c.Id == viewModel.CategoryId
+                })
+                .ToList();
+        }
+
+        private static bool IsDuplicateKey(DbUpdateException ex) =>
+            ex.InnerException is SqlException sql && (sql.Number == 2601 || sql.Number == 2627);
     }
 }
