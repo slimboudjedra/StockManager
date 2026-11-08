@@ -29,7 +29,8 @@ namespace StockManager.Services
         {
             return await _context.Products
                 .Include(p => p.Category)
-                .FirstOrDefaultAsync(p => p.Id == id && !p.IsArchived); 
+                .Include(p => p.PreferredSupplier)
+                .FirstOrDefaultAsync(p => p.Id == id && !p.IsArchived);
         }
 
         //---------------------------------------------------------------------------------------------------------//
@@ -110,6 +111,7 @@ namespace StockManager.Services
                 Name = product.Name,
                 Description = product.Description,
                 CategoryId = product.CategoryId,
+                PreferredSupplierId = product.PreferredSupplierId,
                 MinimumStock = product.MinimumStock,
                 UnitPrice = product.UnitPrice
             };
@@ -140,24 +142,57 @@ namespace StockManager.Services
             return await _context.Categories
                 .AnyAsync(c => c.Id == categoryId);
         }
+        //---------------------------------------------------------------------------------------------------------//
+
+        public async Task<List<Supplier>> GetActiveSuppliersAsync()
+        {
+            return await _context.Suppliers
+                .AsNoTracking()
+                .Where(s => !s.IsArchived)
+                .OrderBy(s => s.Name)
+                .ToListAsync();
+        }
+
+        //---------------------------------------------------------------------------------------------------------//
+
+        // Ein leerer Wert (kein Standardlieferant) ist erlaubt. Ein angegebener Lieferant
+        // muss existieren und darf nicht archiviert sein.
+        private async Task EnsureSupplierIsUsableAsync(int? supplierId)
+        {
+            if (supplierId == null)
+            {
+                return;
+            }
+
+            var usable = await _context.Suppliers
+                .AnyAsync(s => s.Id == supplierId.Value && !s.IsArchived);
+
+            if (!usable)
+            {
+                throw new ArgumentException(
+                    "Der angegebene Lieferant existiert nicht oder ist archiviert.",
+                    nameof(ProductEditViewModel.PreferredSupplierId));
+            }
+        }
 
         //---------------------------------------------------------------------------------------------------------//
 
         public async Task<Product> CreateProductAsync(ProductEditViewModel input)
         {
-
-            if(!await CategoryExistsAsync(input.CategoryId))
+            if (!await CategoryExistsAsync(input.CategoryId))
             {
                 throw new ArgumentException("Die angegebene Kategorie existiert nicht.", nameof(input.CategoryId));
             }
 
+            await EnsureSupplierIsUsableAsync(input.PreferredSupplierId);
+
             var product = new Product
             {
-
                 Reference = input.Reference.Trim(),
                 Name = input.Name,
                 Description = input.Description,
                 CategoryId = input.CategoryId,
+                PreferredSupplierId = input.PreferredSupplierId,
                 MinimumStock = input.MinimumStock,
                 UnitPrice = input.UnitPrice,
                 Quantity = 0,
@@ -167,7 +202,7 @@ namespace StockManager.Services
 
             _context.Products.Add(product);
 
-            await _context.SaveChangesAsync(); 
+            await _context.SaveChangesAsync();
 
             return product;
         }
@@ -181,15 +216,19 @@ namespace StockManager.Services
             {
                 return false;
             }
-            if(!await CategoryExistsAsync(input.CategoryId))
+
+            if (!await CategoryExistsAsync(input.CategoryId))
             {
                 throw new ArgumentException("Die angegebene Kategorie existiert nicht.", nameof(input.CategoryId));
             }
+
+            await EnsureSupplierIsUsableAsync(input.PreferredSupplierId);
 
             product.Reference = input.Reference.Trim();
             product.Name = input.Name;
             product.Description = input.Description;
             product.CategoryId = input.CategoryId;
+            product.PreferredSupplierId = input.PreferredSupplierId;
             product.MinimumStock = input.MinimumStock;
             product.UnitPrice = input.UnitPrice;
 
@@ -206,6 +245,21 @@ namespace StockManager.Services
             {
                 return false;
             }
+
+            var openOrderCount = await _context.PurchaseOrderLines
+                .CountAsync(l => l.ProductId == id &&
+                    (l.PurchaseOrder.Status == PurchaseOrderStatus.Draft ||
+                     l.PurchaseOrder.Status == PurchaseOrderStatus.Ordered ||
+                     l.PurchaseOrder.Status == PurchaseOrderStatus.PartiallyReceived));
+
+            if (openOrderCount > 0)
+            {
+                throw new InvalidOperationException(
+                    openOrderCount == 1
+                        ? "Dieses Produkt ist noch in einer offenen Bestellung. Schließen oder stornieren Sie sie zuerst."
+                        : $"Dieses Produkt ist noch in {openOrderCount} offenen Bestellungen. Schließen oder stornieren Sie sie zuerst.");
+            }
+
             product.IsArchived = true;
             await _context.SaveChangesAsync();
             return true;

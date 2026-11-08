@@ -1,0 +1,247 @@
+@using System.Globalization
+@using StockManager.Models
+@using StockManager.ViewModels
+@model PurchaseOrderDetailsViewModel
+
+@{
+    Layout = "_PageLayout";
+    ViewData["Title"] = "Bestellung " + Model.OrderNumber;
+    ViewData["Subtitle"] = Model.SupplierName;
+
+    var de = CultureInfo.GetCultureInfo("de-DE");
+    var inv = CultureInfo.InvariantCulture;
+
+    var emptyText = Model.CanEdit
+        ? "Fügen Sie unten mindestens eine Position hinzu, um die Bestellung aufzugeben."
+        : "Diese Bestellung enthält keine Positionen.";
+    var emptyModel = new EmptyStateModel("package", "Noch keine Positionen", emptyText);
+}
+
+@section PageActions {
+    @if (Model.CanEdit)
+    {
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Kopfdaten bearbeiten</a>
+    }
+
+    @if (Model.CanReceive)
+    {
+        <a asp-action="Receive" asp-route-id="@Model.Id" class="btn btn-primary">
+            <i data-lucide="package-check" class="me-1"></i>Wareneingang buchen
+        </a>
+    }
+
+    @if (Model.CanPlace)
+    {
+        <form asp-action="Place" asp-route-id="@Model.Id" method="post"
+              onsubmit="return confirm('Bestellung jetzt aufgeben? Danach kann sie nicht mehr bearbeitet werden.');">
+            <button type="submit" class="btn btn-primary">Bestellen</button>
+        </form>
+    }
+
+    @if (Model.CanClose)
+    {
+        <form asp-action="Close" asp-route-id="@Model.Id" method="post"
+              onsubmit="return confirm('Bestellung jetzt abschließen? Die noch offenen Mengen werden nicht mehr erwartet.');">
+            <button type="submit" class="btn btn-outline-secondary">Restmenge abschließen</button>
+        </form>
+    }
+
+    @if (Model.CanCancel)
+    {
+        <form asp-action="Cancel" asp-route-id="@Model.Id" method="post"
+              onsubmit="return confirm('Bestellung wirklich stornieren?');">
+            <button type="submit" class="btn btn-outline-danger">Stornieren</button>
+        </form>
+    }
+
+    @if (Model.CanDelete)
+    {
+        <form asp-action="Delete" asp-route-id="@Model.Id" method="post"
+              onsubmit="return confirm('Entwurf endgültig löschen?');">
+            <button type="submit" class="btn btn-outline-danger">Entwurf löschen</button>
+        </form>
+    }
+}
+
+<a asp-action="Index" class="back-link"><i data-lucide="arrow-left"></i>Alle Bestellungen</a>
+
+<section class="panel mb-4">
+    <div class="panel-body">
+        <dl class="detail-grid">
+            <div>
+                <dt>Status</dt>
+                <dd><span class="badge @Model.Status.GetBadgeClass()">@Model.Status.GetDisplayName()</span></dd>
+            </div>
+            <div>
+                <dt>Lieferant</dt>
+                <dd>@Model.SupplierName</dd>
+            </div>
+            <div>
+                <dt>Angelegt am</dt>
+                <dd>@Model.CreatedAt.ToLocalTime().ToString("g", de)</dd>
+            </div>
+            <div>
+                <dt>Bestellt am</dt>
+                <dd>@(Model.OrderedAt == null ? "–" : Model.OrderedAt.Value.ToLocalTime().ToString("g", de))</dd>
+            </div>
+            <div>
+                <dt>Gewünschtes Lieferdatum</dt>
+                <dd>@(Model.ExpectedDeliveryDate?.ToString("d", de) ?? "–")</dd>
+            </div>
+            <div>
+                <dt>Letzter Wareneingang</dt>
+                <dd>@(Model.LastReceiptAt == null ? "–" : Model.LastReceiptAt.Value.ToLocalTime().ToString("g", de))</dd>
+            </div>
+            <div class="detail-grid__wide">
+                <dt>Notizen</dt>
+                <dd style="white-space: pre-line;">@(string.IsNullOrWhiteSpace(Model.Notes) ? "–" : Model.Notes)</dd>
+            </div>
+        </dl>
+    </div>
+</section>
+
+<section class="panel mb-4">
+    <div class="panel-header">
+        <h2 class="panel-title">Positionen</h2>
+        <span class="text-secondary small">@Model.Lines.Count Position(en)</span>
+    </div>
+
+    @if (!Model.Lines.Any())
+    {
+        <partial name="_EmptyState" model="emptyModel" />
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Referenz</th>
+                        <th>Produkt</th>
+                        <th class="text-end">Menge</th>
+                        <th>Geliefert</th>
+                        <th class="text-end">Einkaufspreis</th>
+                        <th class="text-end">Summe</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var line in Model.Lines)
+                    {
+                        var progress = line.QuantityOrdered > 0
+                            ? Math.Min(100d, line.QuantityReceived * 100d / line.QuantityOrdered)
+                            : 0d;
+                        var complete = line.QuantityReceived >= line.QuantityOrdered;
+
+                        <tr>
+                            <td class="text-secondary">@line.ProductReference</td>
+                            <td class="fw-medium">@line.ProductName</td>
+
+                            @if (Model.CanEdit)
+                            {
+                                <td class="text-end">
+                                    <input type="number" name="quantity" value="@line.QuantityOrdered" min="1"
+                                           class="form-control form-control-sm text-end ms-auto" style="width: 6rem;"
+                                           form="line-form-@line.Id" aria-label="Menge" />
+                                </td>
+                            }
+                            else
+                            {
+                                <td class="text-end">@line.QuantityOrdered</td>
+                            }
+
+                            <td>
+                                <div class="delivery-cell">
+                                    <span>@line.QuantityReceived / @line.QuantityOrdered</span>
+                                    <div class="progress" role="progressbar" aria-label="Geliefert"
+                                         aria-valuenow="@line.QuantityReceived" aria-valuemin="0" aria-valuemax="@line.QuantityOrdered">
+                                        <div class="progress-bar @(complete ? "bg-success" : "")"
+                                             style="width:@(progress.ToString("0.#", inv))%"></div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            @if (Model.CanEdit)
+                            {
+                                <td class="text-end">
+                                    <input type="text" name="purchasePrice" value="@line.PurchasePrice.ToString("F2", de)"
+                                           inputmode="decimal"
+                                           class="form-control form-control-sm text-end ms-auto" style="width: 7rem;"
+                                           form="line-form-@line.Id" aria-label="Einkaufspreis" />
+                                </td>
+                                <td class="text-end">@line.LineTotal.ToString("N2", de) €</td>
+                                <td class="text-end text-nowrap">
+                                    <form id="line-form-@line.Id" asp-action="UpdateLine" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@line.Id" />
+                                        <input type="hidden" name="orderId" value="@Model.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-primary">Speichern</button>
+                                    </form>
+                                    <form asp-action="RemoveLine" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@line.Id" />
+                                        <input type="hidden" name="orderId" value="@Model.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Entfernen</button>
+                                    </form>
+                                </td>
+                            }
+                            else
+                            {
+                                <td class="text-end">@line.PurchasePrice.ToString("N2", de) €</td>
+                                <td class="text-end">@line.LineTotal.ToString("N2", de) €</td>
+                                <td></td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="5" class="text-end">Gesamtsumme</th>
+                        <th class="text-end">@Model.TotalAmount.ToString("N2", de) €</th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    }
+</section>
+
+@if (Model.CanEdit)
+{
+    <section class="panel">
+        <div class="panel-header">
+            <h2 class="panel-title">Position hinzufügen</h2>
+        </div>
+
+        <div class="panel-body">
+            @if (!Model.ProductOptions.Any())
+            {
+                <p class="text-secondary mb-0">Alle aktiven Produkte sind bereits in dieser Bestellung.</p>
+            }
+            else
+            {
+                <form asp-action="AddLine" method="post" class="row g-3 align-items-end">
+                    <input type="hidden" name="orderId" value="@Model.Id" />
+
+                    <div class="col-lg-6">
+                        <label class="form-label" for="productId">Produkt</label>
+                        <select id="productId" name="productId" asp-items="Model.ProductOptions" class="form-select"></select>
+                    </div>
+
+                    <div class="col-sm-4 col-lg-2">
+                        <label class="form-label" for="quantity">Menge</label>
+                        <input id="quantity" name="quantity" type="number" min="1" value="1" class="form-control" />
+                    </div>
+
+                    <div class="col-sm-8 col-lg-2">
+                        <label class="form-label" for="purchasePrice">Einkaufspreis</label>
+                        <input id="purchasePrice" name="purchasePrice" type="text" inputmode="decimal"
+                               class="form-control" placeholder="leer = Produktpreis" />
+                    </div>
+
+                    <div class="col-lg-2">
+                        <button type="submit" class="btn btn-primary w-100">Hinzufügen</button>
+                    </div>
+                </form>
+            }
+        </div>
+    </section>
+}

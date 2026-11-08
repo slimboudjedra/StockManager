@@ -19,6 +19,9 @@ namespace StockManager.Models
 
         [StringLength(250)]
         public string? Comment { get; set; }
+        // Gesetzt, wenn die Bewegung ein Wareneingang zu einer Bestellposition ist
+        public int? PurchaseOrderLineId { get; set; }
+        public PurchaseOrderLine? PurchaseOrderLine { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

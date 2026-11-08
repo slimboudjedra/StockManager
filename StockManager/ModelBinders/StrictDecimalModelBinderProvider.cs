@@ -6,9 +6,13 @@ namespace StockManager.ModelBinders
     {
         public IModelBinder? GetBinder(ModelBinderProviderContext context)
         {
-            return context.Metadata.ModelType == typeof(decimal)
-                ? new StrictDecimalModelBinder()
-                : null;
+            // Gilt für decimal und für decimal? (optionale Beträge).
+            if (context.Metadata.UnderlyingOrModelType != typeof(decimal))
+            {
+                return null;
+            }
+
+            return new StrictDecimalModelBinder(context.Metadata.IsNullableValueType);
         }
     }
 }

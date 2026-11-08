@@ -4,12 +4,13 @@
     ViewData["Title"] = "Anmelden";
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <h1 class="h3 mb-3">Anmelden</h1>
+<section class="panel login-card">
+    <div class="panel-body">
+        <h1 class="h4 mb-1">Anmelden</h1>
+        <p class="text-secondary">Melden Sie sich an, um das Lager zu verwalten.</p>
 
-        <form asp-action="Login" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <form asp-action="Login" method="post" data-submit-once>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
             <input type="hidden" asp-for="ReturnUrl" />
 
             <div class="mb-3">
@@ -24,7 +25,7 @@
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
 
-            <div class="form-check mb-3">
+            <div class="form-check mb-4">
                 <input asp-for="RememberMe" class="form-check-input" />
                 <label asp-for="RememberMe" class="form-check-label"></label>
             </div>
@@ -32,8 +33,9 @@
             <button type="submit" class="btn btn-primary w-100">Anmelden</button>
         </form>
     </div>
-</div>
+</section>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <partial name="_SubmitOnce" />
 }

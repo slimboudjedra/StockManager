@@ -1,50 +1,52 @@
-﻿@model IEnumerable<StockManager.Models.Category>
+@using StockManager.ViewModels
+@model IEnumerable<StockManager.Models.Category>
 
 @{
+    Layout = "_PageLayout";
     ViewData["Title"] = "Kategorien";
+    ViewData["Subtitle"] = "Produkte nach Kategorien ordnen.";
 }
 
-<h1>Kategorien</h1>
-
-@if (TempData["SuccessMessage"] is string message)
-{
-    <div class="alert alert-success">
-        @message
-    </div>
-}
-
-<p>
+@section PageActions {
     <a asp-action="Create" class="btn btn-primary">
-        Neue Kategorie
+        <i data-lucide="plus" class="me-1"></i>Neue Kategorie
     </a>
-</p>
+}
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Beschreibung</th>
-            <th>Aktionen</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var category in Model)
-        {
-            <tr>
-                <td>@category.Name</td>
-                <td>@category.Description</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-sm btn-outline-primary">
-                        Bearbeiten
-                    </a>
-                    <a asp-action="Delete" asp-route-id="@category.Id" class="btn btn-sm btn-outline-danger">
-                        Löschen
-                    </a>
-                    <a asp-action="Details" asp-route-id="@category.Id" class="btn btn-sm btn-outline-secondary">
-                        Details
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="panel">
+    @if (!Model.Any())
+    {
+        <partial name="_EmptyState"
+                 model='new EmptyStateModel("tags", "Noch keine Kategorien", "Legen Sie mit „Neue Kategorie“ die erste Kategorie an.")' />
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Beschreibung</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var category in Model)
+                    {
+                        <tr>
+                            <td class="fw-medium">@category.Name</td>
+                            <td class="text-secondary">@category.Description</td>
+                            <td class="text-end text-nowrap">
+                                <span class="row-links">
+                                    <a asp-action="Details" asp-route-id="@category.Id">Details</a>
+                                    <a asp-action="Edit" asp-route-id="@category.Id">Bearbeiten</a>
+                                    <a asp-action="Delete" asp-route-id="@category.Id" class="row-links__danger">Löschen</a>
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

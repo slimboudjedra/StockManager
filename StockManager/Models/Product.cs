@@ -37,5 +37,7 @@ namespace StockManager.Models
 
         [Timestamp]
         public byte[] RowVersion { get; set; } = Array.Empty<byte>();
+        public int? PreferredSupplierId { get; set; }
+        public Supplier? PreferredSupplier { get; set; }
     }
 }

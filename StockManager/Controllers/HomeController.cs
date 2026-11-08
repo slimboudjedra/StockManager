@@ -22,6 +22,7 @@ namespace StockManager.Controllers
             return View(viewModel);
         }
 
+        [AllowAnonymous]
         public IActionResult Privacy()
         {
             return View();

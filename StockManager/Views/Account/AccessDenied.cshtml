@@ -1,9 +1,14 @@
 @{
+    Layout = "_PageLayout";
     ViewData["Title"] = "Zugriff verweigert";
+    ViewData["Subtitle"] = "Sie haben keine Berechtigung für diese Seite.";
 }
 
-<h1>Zugriff verweigert</h1>
-
-<p class="text-muted">Sie haben keine Berechtigung für diese Seite.</p>
-
-<a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Zur Startseite</a>
+<section class="panel form-panel">
+    <div class="panel-body">
+        <p class="text-secondary">
+            Wenn Sie glauben, dass dies ein Fehler ist, wenden Sie sich an eine Person mit Administratorrechten.
+        </p>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Zur Startseite</a>
+    </div>
+</section>

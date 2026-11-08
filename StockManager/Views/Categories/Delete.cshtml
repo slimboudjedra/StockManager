@@ -1,27 +1,29 @@
-﻿@model StockManager.Models.Category
+@model StockManager.Models.Category
 
 @{
+    Layout = "_PageLayout";
     ViewData["Title"] = "Kategorie löschen";
+    ViewData["Subtitle"] = Model.Name;
 }
 
-<h1>Kategorie löschen</h1>
+<a asp-action="Details" asp-route-id="@Model.Id" class="back-link"><i data-lucide="arrow-left"></i>Zurück zur Kategorie</a>
 
-<h3>Möchten Sie diese Kategorie wirklich löschen?</h3>
-<hr />
+<section class="panel form-panel">
+    <div class="panel-body">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
-<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <p class="fw-medium">Möchten Sie diese Kategorie wirklich löschen?</p>
+        <p class="text-secondary mb-0">
+            Eine Kategorie, der noch Produkte zugeordnet sind (auch archivierte), kann nicht gelöscht werden.
+        </p>
 
-<dl class="row">
-    <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Name)</dt>
-    <dd class="col-sm-10">@Model.Name</dd>
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="Id" />
 
-    <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Description)</dt>
-    <dd class="col-sm-10">@Model.Description</dd>
-</dl>
-
-<form asp-action="Delete" method="post">
-    <input type="hidden" asp-for="Id" />
-
-    <button type="submit" class="btn btn-danger">Löschen</button>
-    <a asp-action="Index" class="btn btn-secondary">Abbrechen</a>
-</form>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">Löschen</button>
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Abbrechen</a>
+            </div>
+        </form>
+    </div>
+</section>

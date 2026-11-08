@@ -1,50 +1,40 @@
-﻿@model StockManager.Models.Category
+@model StockManager.Models.Category
 
 @{
+    Layout = "_PageLayout";
     ViewData["Title"] = "Kategorie bearbeiten";
+    ViewData["Subtitle"] = Model.Name;
 }
 
-<h1>Kategorie bearbeiten</h1>
+<a asp-action="Details" asp-route-id="@Model.Id" class="back-link"><i data-lucide="arrow-left"></i>Zurück zur Kategorie</a>
 
-<hr />
+<form asp-action="Edit" asp-route-id="@Model.Id" method="post" data-submit-once class="panel form-panel form-panel--narrow">
+    <div class="panel-body">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        <input type="hidden" asp-for="Id" />
 
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
-            <input type="hidden" asp-for="Id" />
-
-            <div asp-validation-summary="ModelOnly"
-                 class="text-danger"></div>
-
-            <div class="mb-3">
+        <div class="row g-3">
+            <div class="col-12">
                 <label asp-for="Name" class="form-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name"
-                      class="text-danger"></span>
+                <input asp-for="Name" class="form-control" autofocus />
+                <span asp-validation-for="Name" class="text-danger"></span>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="Description"
-                       class="form-label"></label>
-                <textarea asp-for="Description"
-                          class="form-control"
-                          rows="3"></textarea>
-                <span asp-validation-for="Description"
-                      class="text-danger"></span>
+            <div class="col-12">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
             </div>
+        </div>
 
-            <button type="submit" class="btn btn-primary">
-                Speichern
-            </button>
-
-            <a asp-action="Index"
-               class="btn btn-secondary">
-                Abbrechen
-            </a>
-        </form>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Speichern</button>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Abbrechen</a>
+        </div>
     </div>
-</div>
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <partial name="_SubmitOnce" />
 }

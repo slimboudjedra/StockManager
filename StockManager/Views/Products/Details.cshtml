@@ -1,102 +1,76 @@
+@using System.Globalization
+@using StockManager.ViewModels
 @model StockManager.Models.Product
 
 @{
-    ViewData["Title"] = "Details";
+    Layout = "_PageLayout";
+    ViewData["Title"] = Model.Name;
+    ViewData["Subtitle"] = "Referenz " + Model.Reference;
+
+    var de = CultureInfo.GetCultureInfo("de-DE");
 }
 
-<h1>Details</h1>
+@section PageActions {
+    <a asp-controller="StockMovements" asp-action="Create" asp-route-productId="@Model.Id" class="btn btn-primary">
+        <i data-lucide="plus" class="me-1"></i>Bestand buchen
+    </a>
+    <a asp-controller="StockMovements" asp-action="Index" asp-route-productId="@Model.Id" class="btn btn-outline-secondary">Historie</a>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Bearbeiten</a>
+    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">Archivieren</a>
+}
 
-@if (TempData["SuccessMessage"] is string message)
-{
-    <div class="alert alert-success" role="status">
-        @message
+<a asp-action="Index" class="back-link"><i data-lucide="arrow-left"></i>Alle Produkte</a>
+
+<section class="panel">
+    <div class="panel-body">
+        <dl class="detail-grid">
+            <div>
+                <dt>Bestand</dt>
+                <dd>
+                    <partial name="_StockLevel" model="new StockLevelModel(Model.Quantity, Model.MinimumStock)" />
+                </dd>
+            </div>
+            <div>
+                <dt>Mindestbestand</dt>
+                <dd>@Model.MinimumStock</dd>
+            </div>
+            <div>
+                <dt>Einzelpreis</dt>
+                <dd>@Model.UnitPrice.ToString("N2", de) €</dd>
+            </div>
+            <div>
+                <dt>Lagerwert</dt>
+                <dd>@((Model.Quantity * Model.UnitPrice).ToString("N2", de)) €</dd>
+            </div>
+            <div>
+                <dt>Kategorie</dt>
+                <dd>@(Model.Category?.Name ?? "–")</dd>
+            </div>
+            <div>
+                <dt>Standardlieferant</dt>
+                <dd>
+                    @if (Model.PreferredSupplier == null)
+                    {
+                        <text>–</text>
+                    }
+                    else if (Model.PreferredSupplier.IsArchived)
+                    {
+                        <text>@Model.PreferredSupplier.Name (archiviert)</text>
+                    }
+                    else
+                    {
+                        <a asp-controller="Suppliers" asp-action="Details" asp-route-id="@Model.PreferredSupplier.Id">@Model.PreferredSupplier.Name</a>
+                    }
+                </dd>
+            </div>
+            <div>
+                <dt>Angelegt am</dt>
+                <dd>@Model.CreatedAt.ToLocalTime().ToString("g", de)</dd>
+            </div>
+            <div class="detail-grid__wide">
+                <dt>Beschreibung</dt>
+                <dd>@(string.IsNullOrWhiteSpace(Model.Description) ? "–" : Model.Description)</dd>
+            </div>
+        </dl>
     </div>
-}
-
-<div>
-    <h4>Product</h4>
-    <hr />
-
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Reference)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Reference)
-        </dd>
-
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Category)
-        </dt>
-        <dd class="col-sm-10">
-            @Model.Category?.Name
-        </dd>
-
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Quantity)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Quantity)
-        </dd>
-
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.MinimumStock)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.MinimumStock)
-        </dd>
-
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.UnitPrice)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.UnitPrice)
-        </dd>
-
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.IsArchived)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.IsArchived)
-        </dd>
-    </dl>
-</div>
-
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a>
-    |
-    <a asp-action="Index">Back to List</a>
-    |
-    <a asp-controller="StockMovements"
-       asp-action="Create"
-       asp-route-productId="@Model?.Id">
-        Bestand buchen
-    </a>
-    |
-    <a asp-controller="StockMovements"
-       asp-action="Index"
-       asp-route-productId="@Model?.Id">
-        Bestandshistorie
-    </a>
-</div>
+</section>

@@ -41,6 +41,9 @@ builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<StockService>();
 builder.Services.AddScoped<DashboardService>();
+builder.Services.AddScoped<SupplierService>();
+builder.Services.AddScoped<PurchaseOrderService>();
+builder.Services.AddScoped<ReorderService>();
 
 builder.Services.AddControllersWithViews(options =>
 {

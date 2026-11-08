@@ -1,0 +1,27 @@
+@model StockManager.ViewModels.SupplierEditViewModel
+
+@{
+    Layout = "_PageLayout";
+    ViewData["Title"] = "Neuer Lieferant";
+    ViewData["Subtitle"] = "Nur der Name ist ein Pflichtfeld.";
+}
+
+<a asp-action="Index" class="back-link"><i data-lucide="arrow-left"></i>Alle Lieferanten</a>
+
+<form asp-action="Create" method="post" data-submit-once class="panel form-panel">
+    <div class="panel-body">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <partial name="_SupplierFormFields" model="Model" />
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Speichern</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Abbrechen</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <partial name="_SubmitOnce" />
+}

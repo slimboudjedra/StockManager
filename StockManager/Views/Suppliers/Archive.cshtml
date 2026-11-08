@@ -1,0 +1,30 @@
+@model StockManager.Models.Supplier
+
+@{
+    Layout = "_PageLayout";
+    ViewData["Title"] = "Lieferant archivieren";
+    ViewData["Subtitle"] = Model.Name;
+}
+
+<a asp-action="Details" asp-route-id="@Model.Id" class="back-link"><i data-lucide="arrow-left"></i>Zurück zum Lieferanten</a>
+
+<section class="panel form-panel">
+    <div class="panel-body">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <p class="fw-medium">Möchten Sie diesen Lieferanten wirklich archivieren?</p>
+        <p class="text-secondary mb-0">
+            Der Lieferant erscheint danach nicht mehr in der Liste. Seine Daten bleiben erhalten,
+            und sein Name kann für einen neuen Lieferanten wiederverwendet werden.
+        </p>
+
+        <form asp-action="Archive" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">Archivieren</button>
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Abbrechen</a>
+            </div>
+        </form>
+    </div>
+</section>

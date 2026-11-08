@@ -1,0 +1,72 @@
+@model StockManager.ViewModels.ReceiveOrderViewModel
+
+@{
+    Layout = "_PageLayout";
+    ViewData["Title"] = "Wareneingang buchen";
+    ViewData["Subtitle"] = Model.OrderNumber + " – " + Model.SupplierName;
+}
+
+<a asp-action="Details" asp-route-id="@Model.OrderId" class="back-link"><i data-lucide="arrow-left"></i>Zurück zur Bestellung</a>
+
+<form asp-action="Receive" asp-route-id="@Model.OrderId" method="post" data-submit-once>
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+    <input type="hidden" asp-for="OrderId" />
+
+    <p class="text-secondary">
+        Tragen Sie ein, wie viele Stück jeder Position geliefert wurden. Das Feld ist mit der offenen
+        Restmenge vorbelegt. Eine Position, die nicht geliefert wurde, setzen Sie auf 0.
+    </p>
+
+    <section class="panel mb-4">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Referenz</th>
+                        <th>Produkt</th>
+                        <th class="text-end">Bestellt</th>
+                        <th class="text-end">Bereits geliefert</th>
+                        <th class="text-end">Offen</th>
+                        <th class="text-end">Jetzt geliefert</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var i = 0; i < Model.Lines.Count; i++)
+                    {
+                        <tr>
+                            <td class="text-secondary">@Model.Lines[i].ProductReference</td>
+                            <td class="fw-medium">@Model.Lines[i].ProductName</td>
+                            <td class="text-end">@Model.Lines[i].QuantityOrdered</td>
+                            <td class="text-end">@Model.Lines[i].QuantityReceived</td>
+                            <td class="text-end">@Model.Lines[i].Remaining</td>
+                            <td>
+                                <input type="hidden" asp-for="Lines[i].LineId" />
+                                <input asp-for="Lines[i].QuantityNow" type="number" min="0" max="@Model.Lines[i].Remaining"
+                                       class="form-control form-control-sm text-end ms-auto" style="width: 7rem;" />
+                                <span asp-validation-for="Lines[i].QuantityNow" class="text-danger"></span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel form-panel">
+        <div class="panel-body">
+            <label asp-for="Comment" class="form-label"></label>
+            <input asp-for="Comment" class="form-control" />
+            <span asp-validation-for="Comment" class="text-danger"></span>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Wareneingang buchen</button>
+                <a asp-action="Details" asp-route-id="@Model.OrderId" class="btn btn-outline-secondary">Abbrechen</a>
+            </div>
+        </div>
+    </section>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <partial name="_SubmitOnce" />
+}

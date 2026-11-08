@@ -1,0 +1,26 @@
+@{
+    Layout = "_Layout";
+    var subtitle = ViewData["Subtitle"] as string;
+}
+
+<partial name="_Alerts" />
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">@ViewData["Title"]</h1>
+        @if (!string.IsNullOrWhiteSpace(subtitle))
+        {
+            <p class="page-subtitle">@subtitle</p>
+        }
+    </div>
+
+    <div class="page-actions">
+        @await RenderSectionAsync("PageActions", required: false)
+    </div>
+</div>
+
+@RenderBody()
+
+@section Scripts {
+    @await RenderSectionAsync("Scripts", required: false)
+}

@@ -1,0 +1,20 @@
+@model StockManager.ViewModels.StockLevelModel
+@{
+    long quantity = Model.Quantity;
+    long minimum = Math.Max(Model.MinimumStock, 0);
+    long scale = Math.Max(Math.Max(minimum * 2, quantity), 1);
+    var fill = Math.Min(100d, quantity * 100d / scale);
+    var tick = minimum * 100d / scale;
+    var state = quantity * 2 <= minimum ? "critical" : quantity <= minimum ? "low" : "ok";
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+}
+<div class="stock-cell">
+    <span class="stock-cell__num @(state == "critical" ? "stock-cell__num--critical" : "")">@Model.Quantity</span>
+    <div class="stock-level" role="img" aria-label="Bestand @Model.Quantity, Mindestbestand @Model.MinimumStock">
+        <div class="stock-level__fill stock-level__fill--@state" style="width:@(fill.ToString("0.#", inv))%"></div>
+        @if (minimum > 0)
+        {
+            <div class="stock-level__min" style="left:@(tick.ToString("0.#", inv))%"></div>
+        }
+    </div>
+</div>

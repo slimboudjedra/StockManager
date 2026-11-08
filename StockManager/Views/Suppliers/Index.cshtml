@@ -1,0 +1,119 @@
+@using StockManager.ViewModels
+@model List<StockManager.Models.Supplier>
+
+@{
+    Layout = "_PageLayout";
+
+    var archived = ViewData["Archived"] as bool? ?? false;
+    var searchString = ViewData["SearchString"] as string;
+    var hasSearch = !string.IsNullOrWhiteSpace(searchString);
+
+    ViewData["Title"] = archived ? "Archivierte Lieferanten" : "Lieferanten";
+    ViewData["Subtitle"] = archived
+        ? "Archivierte Lieferanten können wiederhergestellt werden."
+        : "Lieferanten verwalten und Bestellungen vorbereiten.";
+}
+
+@section PageActions {
+    @if (!archived)
+    {
+        <a asp-action="Create" class="btn btn-primary">
+            <i data-lucide="plus" class="me-1"></i>Neuer Lieferant
+        </a>
+    }
+}
+
+<div class="filter-bar">
+    <ul class="nav nav-pills">
+        <li class="nav-item">
+            <a class="nav-link @(!archived ? "active" : "")" asp-action="Index" asp-route-searchString="@searchString">Aktiv</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(archived ? "active" : "")" asp-action="Index" asp-route-searchString="@searchString" asp-route-archived="true">Archiviert</a>
+        </li>
+    </ul>
+
+    <form asp-action="Index" method="get" class="filter-search">
+        @if (archived)
+        {
+            <input type="hidden" name="archived" value="true" />
+        }
+
+        <div class="input-group">
+            <input type="text" name="searchString" value="@searchString"
+                   class="form-control" placeholder="Nach Name, Ansprechpartner oder Ort suchen..."
+                   aria-label="Suche" />
+            <button type="submit" class="btn btn-primary">Suchen</button>
+            @if (hasSearch)
+            {
+                <a asp-action="Index" asp-route-archived="@(archived ? "true" : null)" class="btn btn-outline-secondary">Zurücksetzen</a>
+            }
+        </div>
+    </form>
+</div>
+
+<div class="panel">
+    @if (!Model.Any())
+    {
+        if (hasSearch)
+        {
+            <partial name="_EmptyState"
+                     model='new EmptyStateModel("search", "Keine Lieferanten gefunden", "Zu dieser Suche gibt es keine Treffer.")' />
+        }
+        else if (archived)
+        {
+            <partial name="_EmptyState"
+                     model='new EmptyStateModel("archive", "Keine archivierten Lieferanten", "Archivierte Lieferanten erscheinen hier.")' />
+        }
+        else
+        {
+            <partial name="_EmptyState"
+                     model='new EmptyStateModel("truck", "Noch keine Lieferanten", "Legen Sie mit „Neuer Lieferant“ den ersten Lieferanten an.")' />
+        }
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Ansprechpartner</th>
+                        <th>Ort</th>
+                        <th>E-Mail</th>
+                        <th>Telefon</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var supplier in Model)
+                    {
+                        <tr>
+                            <td class="fw-medium">@supplier.Name</td>
+                            <td>@supplier.ContactPerson</td>
+                            <td>@supplier.City</td>
+                            <td>@supplier.Email</td>
+                            <td>@supplier.Phone</td>
+                            <td class="text-end text-nowrap">
+                                @if (archived)
+                                {
+                                    <form asp-action="Restore" asp-route-id="@supplier.Id" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary">Wiederherstellen</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="row-links">
+                                        <a asp-action="Details" asp-route-id="@supplier.Id">Details</a>
+                                        <a asp-action="Edit" asp-route-id="@supplier.Id">Bearbeiten</a>
+                                        <a asp-action="Archive" asp-route-id="@supplier.Id" class="row-links__danger">Archivieren</a>
+                                    </span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

@@ -1,0 +1,77 @@
+@using System.Globalization
+@model StockManager.Models.Supplier
+
+@{
+    Layout = "_PageLayout";
+    ViewData["Title"] = Model.Name;
+    ViewData["Subtitle"] = string.IsNullOrWhiteSpace(Model.City) ? "Lieferant" : "Lieferant in " + Model.City;
+
+    var de = CultureInfo.GetCultureInfo("de-DE");
+    var hasAddress = !string.IsNullOrWhiteSpace(Model.Street)
+        || !string.IsNullOrWhiteSpace(Model.PostalCode)
+        || !string.IsNullOrWhiteSpace(Model.City);
+    var cityLine = $"{Model.PostalCode} {Model.City}".Trim();
+}
+
+@section PageActions {
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Bearbeiten</a>
+    <a asp-action="Archive" asp-route-id="@Model.Id" class="btn btn-outline-danger">Archivieren</a>
+}
+
+<a asp-action="Index" class="back-link"><i data-lucide="arrow-left"></i>Alle Lieferanten</a>
+
+<section class="panel">
+    <div class="panel-body">
+        <dl class="detail-grid">
+            <div>
+                <dt>Ansprechpartner</dt>
+                <dd>@(string.IsNullOrWhiteSpace(Model.ContactPerson) ? "–" : Model.ContactPerson)</dd>
+            </div>
+            <div>
+                <dt>Telefon</dt>
+                <dd>@(string.IsNullOrWhiteSpace(Model.Phone) ? "–" : Model.Phone)</dd>
+            </div>
+            <div>
+                <dt>E-Mail</dt>
+                <dd>
+                    @if (string.IsNullOrWhiteSpace(Model.Email))
+                    {
+                        <text>–</text>
+                    }
+                    else
+                    {
+                        <a href="mailto:@Model.Email">@Model.Email</a>
+                    }
+                </dd>
+            </div>
+            <div>
+                <dt>Adresse</dt>
+                <dd>
+                    @if (!hasAddress)
+                    {
+                        <text>–</text>
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrWhiteSpace(Model.Street))
+                        {
+                            <div>@Model.Street</div>
+                        }
+                        if (cityLine.Length > 0)
+                        {
+                            <div>@cityLine</div>
+                        }
+                    }
+                </dd>
+            </div>
+            <div>
+                <dt>Angelegt am</dt>
+                <dd>@Model.CreatedAt.ToLocalTime().ToString("d", de)</dd>
+            </div>
+            <div class="detail-grid__wide">
+                <dt>Notizen</dt>
+                <dd style="white-space: pre-line;">@(string.IsNullOrWhiteSpace(Model.Notes) ? "–" : Model.Notes)</dd>
+            </div>
+        </dl>
+    </div>
+</section>

@@ -18,12 +18,16 @@ namespace StockManager.Controllers
             _productService = productService;
         }
 
+        //---------------------------------------------------------------------------------------------------------//
+
         // GET: Products
         public async Task<IActionResult> Index(string? searchString, int page = 1, bool lowStockOnly = false)
         {
             var viewModel = await _productService.GetProductsAsync(searchString, page, lowStockOnly);
             return View(viewModel);
         }
+
+        //---------------------------------------------------------------------------------------------------------//
 
         // GET: Products/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -42,13 +46,17 @@ namespace StockManager.Controllers
             return View(product);
         }
 
+        //---------------------------------------------------------------------------------------------------------//
+
         // GET: Products/Create
         public async Task<IActionResult> Create()
         {
             var viewModel = new ProductEditViewModel();
-            await PopulateCategoriesAsync(viewModel);
+            await PopulateListsAsync(viewModel);
             return View(viewModel);
         }
+
+        //---------------------------------------------------------------------------------------------------------//
 
         // POST: Products/Create
         [HttpPost]
@@ -72,16 +80,18 @@ namespace StockManager.Controllers
                     {
                         ModelState.AddModelError(nameof(input.Reference), DuplicateReferenceMessage);
                     }
-                    catch (ArgumentException ex) when (ex.ParamName == nameof(input.CategoryId))
+                    catch (ArgumentException ex) when (IsFormFieldError(ex))
                     {
-                        ModelState.AddModelError(nameof(input.CategoryId), ex.Message);
+                        ModelState.AddModelError(ex.ParamName!, ex.Message);
                     }
                 }
             }
 
-            await PopulateCategoriesAsync(input);
+            await PopulateListsAsync(input);
             return View(input);
         }
+
+        //---------------------------------------------------------------------------------------------------------//
 
         // GET: Products/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -97,9 +107,11 @@ namespace StockManager.Controllers
                 return NotFound();
             }
 
-            await PopulateCategoriesAsync(viewModel);
+            await PopulateListsAsync(viewModel);
             return View(viewModel);
         }
+
+        //---------------------------------------------------------------------------------------------------------//
 
         // POST: Products/Edit/5
         [HttpPost]
@@ -133,16 +145,18 @@ namespace StockManager.Controllers
                     {
                         ModelState.AddModelError(nameof(input.Reference), DuplicateReferenceMessage);
                     }
-                    catch (ArgumentException ex) when (ex.ParamName == nameof(input.CategoryId))
+                    catch (ArgumentException ex) when (IsFormFieldError(ex))
                     {
-                        ModelState.AddModelError(nameof(input.CategoryId), ex.Message);
+                        ModelState.AddModelError(ex.ParamName!, ex.Message);
                     }
                 }
             }
 
-            await PopulateCategoriesAsync(input);
+            await PopulateListsAsync(input);
             return View(input);
         }
+
+        //---------------------------------------------------------------------------------------------------------//
 
         // GET: Products/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -161,25 +175,45 @@ namespace StockManager.Controllers
             return View(product);
         }
 
+        //---------------------------------------------------------------------------------------------------------//
+
         // POST: Products/Delete/5  (archiviert das Produkt, löscht es nicht)
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var archived = await _productService.ArchiveProductAsync(id);
-            if (!archived)
+            try
             {
-                return NotFound();
-            }
+                var archived = await _productService.ArchiveProductAsync(id);
+                if (!archived)
+                {
+                    return NotFound();
+                }
 
-            return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index));
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Das Produkt steckt noch in einer offenen Bestellung: Wir bleiben auf der
+                // Bestätigungsseite und zeigen den Grund.
+                var product = await _productService.GetProductByIdAsync(id);
+                if (product == null)
+                {
+                    return NotFound();
+                }
+
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(product);
+            }
         }
 
         //---------------------------------------------------------------------------------------------------------//
 
-        private async Task PopulateCategoriesAsync(ProductEditViewModel viewModel)
+        // Füllt die beiden Auswahllisten (Kategorie und Standardlieferant) des Formulars.
+        private async Task PopulateListsAsync(ProductEditViewModel viewModel)
         {
             var categories = await _productService.GetCategoriesAsync();
+            var suppliers = await _productService.GetActiveSuppliersAsync();
 
             viewModel.Categories = categories
                 .Select(c => new SelectListItem
@@ -189,9 +223,25 @@ namespace StockManager.Controllers
                     Selected = c.Id == viewModel.CategoryId
                 })
                 .ToList();
+
+            viewModel.Suppliers = suppliers
+                .Select(s => new SelectListItem
+                {
+                    Value = s.Id.ToString(),
+                    Text = s.Name,
+                    Selected = s.Id == viewModel.PreferredSupplierId
+                })
+                .ToList();
         }
+
+        //---------------------------------------------------------------------------------------------------------//
 
         private static bool IsDuplicateKey(DbUpdateException ex) =>
             ex.InnerException is SqlException sql && (sql.Number == 2601 || sql.Number == 2627);
+
+        // Der Parametername der ArgumentException entspricht dem Feld des Formulars.
+        private static bool IsFormFieldError(ArgumentException ex) =>
+            ex.ParamName is nameof(ProductEditViewModel.CategoryId)
+                or nameof(ProductEditViewModel.PreferredSupplierId);
     }
 }

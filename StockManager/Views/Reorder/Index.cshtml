@@ -1,0 +1,136 @@
+@using System.Globalization
+@using StockManager.ViewModels
+@model ReorderSuggestionsViewModel
+
+@{
+    Layout = "_PageLayout";
+    ViewData["Title"] = "Nachbestellvorschlag";
+    ViewData["Subtitle"] = "Produkte, deren Bestand den Mindestbestand nicht übersteigt, einschließlich bereits bestellter Mengen.";
+
+    var de = CultureInfo.GetCultureInfo("de-DE");
+}
+
+@section PageActions {
+    <a asp-controller="PurchaseOrders" asp-action="Index" class="btn btn-outline-secondary">Zu den Bestellungen</a>
+
+    @if (Model.Groups.Count > 1)
+    {
+        <form asp-action="CreateDrafts" method="post"
+              onsubmit="return confirm('Für @Model.Groups.Count Lieferanten je einen Entwurf anlegen?');">
+            <button type="submit" class="btn btn-primary">Alle Entwürfe erstellen (@Model.Groups.Count)</button>
+        </form>
+    }
+}
+
+<p class="text-secondary">
+    Vorgeschlagen wird die Menge bis zum doppelten Mindestbestand. Es werden Entwürfe angelegt,
+    die Sie vor dem Bestellen noch ändern können.
+</p>
+
+@if (Model.IsEmpty)
+{
+    <div class="panel">
+        <partial name="_EmptyState"
+                 model='new EmptyStateModel("check-circle", "Alles ausreichend versorgt", "Es gibt nichts nachzubestellen.")' />
+    </div>
+}
+
+@foreach (var group in Model.Groups)
+{
+    <section class="panel mb-4">
+        <div class="panel-header">
+            <div>
+                <h2 class="panel-title">@group.SupplierName</h2>
+                <div class="text-secondary small">
+                    @group.Items.Count Produkt(e), Summe @group.TotalAmount.ToString("N2", de) €
+                </div>
+            </div>
+
+            <form asp-action="CreateDrafts" method="post">
+                <input type="hidden" name="supplierId" value="@group.SupplierId" />
+                <button type="submit" class="btn btn-primary btn-sm">Entwurf erstellen</button>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Referenz</th>
+                        <th>Produkt</th>
+                        <th>Bestand</th>
+                        <th class="text-end">Mindestbestand</th>
+                        <th class="text-end">Bereits erwartet</th>
+                        <th class="text-end">Vorschlag</th>
+                        <th class="text-end">Preis</th>
+                        <th class="text-end">Summe</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in group.Items)
+                    {
+                        <tr>
+                            <td class="text-secondary">@item.Reference</td>
+                            <td class="fw-medium">@item.Name</td>
+                            <td>
+                                <partial name="_StockLevel" model="new StockLevelModel(item.Quantity, item.MinimumStock)" />
+                            </td>
+                            <td class="text-end">@item.MinimumStock</td>
+                            <td class="text-end">@item.OpenQuantity</td>
+                            <td class="text-end fw-semibold">@item.SuggestedQuantity</td>
+                            <td class="text-end">@item.UnitPrice.ToString("N2", de) €</td>
+                            <td class="text-end">@item.LineTotal.ToString("N2", de) €</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}
+
+@if (Model.WithoutSupplier.Any())
+{
+    <section class="panel">
+        <div class="panel-header">
+            <div>
+                <h2 class="panel-title">Ohne Standardlieferant</h2>
+                <div class="text-secondary small">
+                    Für diese Produkte ist kein Standardlieferant hinterlegt (oder er ist archiviert).
+                    Wählen Sie einen aus, dann erscheinen sie oben im Vorschlag.
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Referenz</th>
+                        <th>Produkt</th>
+                        <th>Bestand</th>
+                        <th class="text-end">Mindestbestand</th>
+                        <th class="text-end">Vorschlag</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.WithoutSupplier)
+                    {
+                        <tr>
+                            <td class="text-secondary">@item.Reference</td>
+                            <td class="fw-medium">@item.Name</td>
+                            <td>
+                                <partial name="_StockLevel" model="new StockLevelModel(item.Quantity, item.MinimumStock)" />
+                            </td>
+                            <td class="text-end">@item.MinimumStock</td>
+                            <td class="text-end">@item.SuggestedQuantity</td>
+                            <td class="text-end">
+                                <a asp-controller="Products" asp-action="Edit" asp-route-id="@item.ProductId">Lieferanten wählen</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}

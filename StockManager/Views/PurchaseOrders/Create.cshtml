@@ -1,0 +1,27 @@
+@model StockManager.ViewModels.PurchaseOrderEditViewModel
+
+@{
+    Layout = "_PageLayout";
+    ViewData["Title"] = "Neue Bestellung";
+    ViewData["Subtitle"] = "Die Bestellung wird als Entwurf angelegt. Die Positionen fügen Sie auf der nächsten Seite hinzu.";
+}
+
+<a asp-action="Index" class="back-link"><i data-lucide="arrow-left"></i>Alle Bestellungen</a>
+
+<form asp-action="Create" method="post" data-submit-once class="panel form-panel">
+    <div class="panel-body">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <partial name="_OrderFormFields" model="Model" />
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Entwurf anlegen</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Abbrechen</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <partial name="_SubmitOnce" />
+}

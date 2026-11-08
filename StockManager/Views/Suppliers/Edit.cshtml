@@ -1,0 +1,28 @@
+@model StockManager.ViewModels.SupplierEditViewModel
+
+@{
+    Layout = "_PageLayout";
+    ViewData["Title"] = "Lieferant bearbeiten";
+    ViewData["Subtitle"] = Model.Name;
+}
+
+<a asp-action="Details" asp-route-id="@Model.Id" class="back-link"><i data-lucide="arrow-left"></i>Zurück zum Lieferanten</a>
+
+<form asp-action="Edit" asp-route-id="@Model.Id" method="post" data-submit-once class="panel form-panel">
+    <div class="panel-body">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        <input type="hidden" asp-for="Id" />
+
+        <partial name="_SupplierFormFields" model="Model" />
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Speichern</button>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Abbrechen</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <partial name="_SubmitOnce" />
+}

@@ -1,0 +1,50 @@
+@model StockManager.ViewModels.ProductEditViewModel
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <label asp-for="Reference" class="form-label"></label>
+        <input asp-for="Reference" class="form-control" autofocus />
+        <span asp-validation-for="Reference" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-8">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <label asp-for="Description" class="form-label"></label>
+        <input asp-for="Description" class="form-control" />
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="CategoryId" class="form-label"></label>
+        <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select">
+            <option value="0">-- Kategorie wählen --</option>
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="PreferredSupplierId" class="form-label"></label>
+        <select asp-for="PreferredSupplierId" asp-items="Model.Suppliers" class="form-select">
+            <option value="">-- kein Standardlieferant --</option>
+        </select>
+        <span asp-validation-for="PreferredSupplierId" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="MinimumStock" class="form-label"></label>
+        <input asp-for="MinimumStock" class="form-control" />
+        <span asp-validation-for="MinimumStock" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="UnitPrice" class="form-label"></label>
+        <input asp-for="UnitPrice" class="form-control" inputmode="decimal" />
+        <div class="field-hint">Format: 12,50</div>
+        <span asp-validation-for="UnitPrice" class="text-danger"></span>
+    </div>
+</div>

@@ -38,5 +38,10 @@ namespace StockManager.ViewModels
         public decimal UnitPrice { get; set; }
 
         public IEnumerable<SelectListItem> Categories { get; set; } = new List<SelectListItem>();
+
+        [Display(Name = "Standardlieferant")]
+        public int? PreferredSupplierId { get; set; }
+
+        public IEnumerable<SelectListItem> Suppliers { get; set; } = new List<SelectListItem>();
     }
 }

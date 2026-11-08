@@ -1,0 +1,17 @@
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll("form[data-submit-once]").forEach(function (form) {
+            form.addEventListener("submit", function () {
+                if (window.jQuery && jQuery.validator && !jQuery(form).valid()) {
+                    return;
+                }
+
+                var button = form.querySelector("button[type=submit]");
+                if (button) {
+                    button.disabled = true;
+                    button.textContent = "Wird gespeichert...";
+                }
+            });
+        });
+    });
+</script>

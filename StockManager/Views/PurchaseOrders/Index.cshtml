@@ -1,0 +1,87 @@
+@using System.Globalization
+@using StockManager.Models
+@using StockManager.ViewModels
+@model List<PurchaseOrderListItem>
+
+@{
+    Layout = "_PageLayout";
+    ViewData["Title"] = "Bestellungen";
+    ViewData["Subtitle"] = "Bestellungen bei Lieferanten vom Entwurf bis zum Wareneingang.";
+
+    var current = ViewData["Status"] as PurchaseOrderStatus?;
+    var de = CultureInfo.GetCultureInfo("de-DE");
+}
+
+@section PageActions {
+    <a asp-controller="Reorder" asp-action="Index" class="btn btn-outline-secondary">
+        <i data-lucide="shopping-cart" class="me-1"></i>Nachbestellvorschlag
+    </a>
+    <a asp-action="Create" class="btn btn-primary">
+        <i data-lucide="plus" class="me-1"></i>Neue Bestellung
+    </a>
+}
+
+<div class="filter-bar">
+    <ul class="nav nav-pills flex-wrap">
+        <li class="nav-item">
+            <a class="nav-link @(current == null ? "active" : "")" asp-action="Index">Alle</a>
+        </li>
+        @foreach (var status in Enum.GetValues<PurchaseOrderStatus>())
+        {
+            <li class="nav-item">
+                <a class="nav-link @(current == status ? "active" : "")"
+                   asp-action="Index" asp-route-status="@status">@status.GetDisplayName()</a>
+            </li>
+        }
+    </ul>
+</div>
+
+<div class="panel">
+    @if (!Model.Any())
+    {
+        if (current == null)
+        {
+            <partial name="_EmptyState"
+                     model='new EmptyStateModel("clipboard-list", "Noch keine Bestellungen", "Legen Sie mit „Neue Bestellung“ den ersten Entwurf an.")' />
+        }
+        else
+        {
+            <partial name="_EmptyState"
+                     model='new EmptyStateModel("search", "Keine Bestellungen", "Es gibt keine Bestellungen mit diesem Status.")' />
+        }
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Nummer</th>
+                        <th>Lieferant</th>
+                        <th>Status</th>
+                        <th>Angelegt am</th>
+                        <th>Lieferdatum</th>
+                        <th class="text-end">Positionen</th>
+                        <th class="text-end">Summe</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        <tr>
+                            <td>
+                                <a class="fw-medium text-decoration-none" asp-action="Details" asp-route-id="@order.Id">@order.OrderNumber</a>
+                            </td>
+                            <td>@order.SupplierName</td>
+                            <td><span class="badge @order.Status.GetBadgeClass()">@order.Status.GetDisplayName()</span></td>
+                            <td class="text-secondary">@order.CreatedAt.ToLocalTime().ToString("d", de)</td>
+                            <td class="text-secondary">@(order.ExpectedDeliveryDate?.ToString("d", de) ?? "–")</td>
+                            <td class="text-end">@order.LineCount</td>
+                            <td class="text-end">@order.TotalAmount.ToString("N2", de) €</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

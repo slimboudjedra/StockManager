@@ -12,6 +12,8 @@ namespace StockManager.Tests
         private readonly SqliteConnection _connection;
         private readonly DbContextOptions<ApplicationDbContext> _options;
 
+        //----------------------------------------------------------------//
+
         public TestDatabase()
         {
             _connection = new SqliteConnection("DataSource=:memory:");
@@ -30,9 +32,15 @@ namespace StockManager.Tests
             return new TestApplicationDbContext(_options);
         }
 
+        //----------------------------------------------------------------//
+
         // Legt ein Produkt (mit eigener Kategorie) an und gibt die Id zurück.
-        public int AddProduct
-            (int quantity,bool isArchived = false,int minimumStock = 0,decimal unitPrice = 1m)
+        public int AddProduct(
+            int quantity,
+            bool isArchived = false,
+            int minimumStock = 0,
+            decimal unitPrice = 1m,
+            int? preferredSupplierId = null)
         {
             using var context = CreateContext();
 
@@ -44,6 +52,7 @@ namespace StockManager.Tests
                 MinimumStock = minimumStock,
                 UnitPrice = unitPrice,
                 IsArchived = isArchived,
+                PreferredSupplierId = preferredSupplierId,
                 Category = new Category { Name = "Kat-" + Guid.NewGuid().ToString("N") }
             };
 
@@ -52,6 +61,23 @@ namespace StockManager.Tests
 
             return product.Id;
         }
+
+        //----------------------------------------------------------------//
+
+        // Legt eine Kategorie an und gibt die Id zurück.
+        public int AddCategory()
+        {
+            using var context = CreateContext();
+
+            var category = new Category { Name = "Kat-" + Guid.NewGuid().ToString("N") };
+
+            context.Categories.Add(category);
+            context.SaveChanges();
+
+            return category.Id;
+        }
+
+        //----------------------------------------------------------------//
 
         public int GetQuantity(int productId)
         {
@@ -63,12 +89,16 @@ namespace StockManager.Tests
                 .Single();
         }
 
+        //----------------------------------------------------------------//
+
         public int CountMovements(int productId)
         {
             using var context = CreateContext();
 
             return context.StockMovements.Count(m => m.ProductId == productId);
         }
+
+        //----------------------------------------------------------------//
 
         public void Dispose()
         {
@@ -92,6 +122,10 @@ namespace StockManager.Tests
 
             modelBuilder.Entity<Product>()
                 .Property(p => p.RowVersion)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<PurchaseOrder>()
+                .Property(o => o.RowVersion)
                 .ValueGeneratedNever();
         }
     }

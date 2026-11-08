@@ -1,6 +1,41 @@
-﻿@{
-    ViewData["Title"] = "Privacy Policy";
+@{
+    Layout = "_PageLayout";
+    ViewData["Title"] = "Datenschutz";
+    ViewData["Subtitle"] = "Hinweise zur Verarbeitung personenbezogener Daten in dieser Anwendung.";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<section class="panel form-panel">
+    <div class="panel-body">
+        <p>
+            Diese Anwendung ist ein Demonstrationsprojekt zur Lagerverwaltung. Sie verarbeitet nur die Daten,
+            die für den Betrieb nötig sind.
+        </p>
+
+        <h2 class="h5 mt-4">Verantwortliche Stelle</h2>
+        <p>[Name und Anschrift der verantwortlichen Person eintragen]</p>
+
+        <h2 class="h5 mt-4">Welche Daten gespeichert werden</h2>
+        <ul>
+            <li>
+                <strong>Benutzerkonto:</strong> E-Mail-Adresse (Anmeldename) und ein Passwort-Hash, also ein nicht
+                umkehrbarer Wert. Das Passwort selbst wird nie im Klartext gespeichert.
+            </li>
+            <li>
+                <strong>Lagerdaten:</strong> Produkte, Kategorien, Lieferanten (einschließlich Ansprechpartner und
+                Kontaktdaten), Bestellungen und Bestandsbewegungen.
+            </li>
+        </ul>
+
+        <h2 class="h5 mt-4">Cookies</h2>
+        <p>
+            Es werden nur technisch notwendige Cookies verwendet: ein Cookie für die Anmeldung und ein Cookie
+            zum Schutz vor gefälschten Formularübermittlungen. Es gibt keine Analyse- oder Werbedienste. Schriftarten, Symbole und Skripte werden vollständig von diesem Server geladen; es werden keine Inhalte von Drittanbietern nachgeladen.
+        </p>
+
+        <h2 class="h5 mt-4">Ihre Rechte</h2>
+        <p class="mb-0">
+            Sie können Auskunft über Ihre gespeicherten Daten sowie deren Berichtigung und Löschung verlangen.
+            Wenden Sie sich dazu an die oben genannte Stelle.
+        </p>
+    </div>
+</section>

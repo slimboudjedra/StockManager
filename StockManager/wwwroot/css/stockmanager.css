@@ -1,0 +1,968 @@
+/* ==========================================================================
+   StockManager: Design-Grundlagen
+   Wird NACH site.css geladen und überschreibt Bootstrap-Variablen (Bootstrap 5.3).
+   ========================================================================== */
+
+/* ---------- Schrift (lokal gehostet, IBM Plex Sans, SIL OFL) ---------- */
+
+@font-face {
+    font-family: "IBM Plex Sans";
+    src: url("../fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "IBM Plex Sans";
+    src: url("../fonts/ibm-plex-sans-latin-500-normal.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "IBM Plex Sans";
+    src: url("../fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ---------- Farben und Bootstrap-Variablen ---------- */
+
+:root {
+    --sm-ink: #1E2A33;
+    --sm-ink-soft: #44525E;
+    --sm-muted: #5B6B78;
+    --sm-paper: #F3F5F7;
+    --sm-surface: #FFFFFF;
+    --sm-line: #DCE2E8;
+    --sm-line-strong: #C9D1D9;
+    --sm-petrol: #0B6E78;
+    --sm-petrol-dark: #095A63;
+    --sm-petrol-darker: #084D55;
+    --sm-ok: #2F7D4F;
+    --sm-low: #D99A00;
+    --sm-critical: #B3261E;
+    --sm-font: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --bs-body-font-family: var(--sm-font);
+    --bs-body-font-size: .9375rem;
+    --bs-body-color: #1E2A33;
+    --bs-body-color-rgb: 30, 42, 51;
+    --bs-body-bg: #F3F5F7;
+    --bs-body-bg-rgb: 243, 245, 247;
+    --bs-primary: #0B6E78;
+    --bs-primary-rgb: 11, 110, 120;
+    --bs-secondary: #5B6B78;
+    --bs-secondary-rgb: 91, 107, 120;
+    --bs-success: #2F7D4F;
+    --bs-success-rgb: 47, 125, 79;
+    --bs-warning: #D99A00;
+    --bs-warning-rgb: 217, 154, 0;
+    --bs-danger: #B3261E;
+    --bs-danger-rgb: 179, 38, 30;
+    --bs-link-color: #0B6E78;
+    --bs-link-color-rgb: 11, 110, 120;
+    --bs-link-hover-color: #084D55;
+    --bs-link-hover-color-rgb: 8, 77, 85;
+    --bs-border-color: #DCE2E8;
+    --bs-border-radius: .5rem;
+    --bs-border-radius-lg: .75rem;
+}
+
+/* ---------- Grundelemente ---------- */
+
+body {
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
+}
+
+h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
+    font-weight: 600;
+    letter-spacing: -.01em;
+    color: var(--sm-ink);
+}
+
+h1, .h1 {
+    font-size: 1.75rem;
+}
+
+h2, .h2 {
+    font-size: 1.375rem;
+}
+
+h3, .h3 {
+    font-size: 1.125rem;
+}
+
+a:focus-visible {
+    outline: 2px solid var(--sm-petrol);
+    outline-offset: 2px;
+    border-radius: .25rem;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+    --bs-btn-font-weight: 500;
+    --bs-btn-border-radius: .5rem;
+}
+
+.btn-primary {
+    --bs-btn-bg: #0B6E78;
+    --bs-btn-border-color: #0B6E78;
+    --bs-btn-hover-bg: #095A63;
+    --bs-btn-hover-border-color: #095A63;
+    --bs-btn-active-bg: #084D55;
+    --bs-btn-active-border-color: #084D55;
+    --bs-btn-disabled-bg: #0B6E78;
+    --bs-btn-disabled-border-color: #0B6E78;
+    --bs-btn-focus-shadow-rgb: 11, 110, 120;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: #0B6E78;
+    --bs-btn-border-color: #0B6E78;
+    --bs-btn-hover-bg: #0B6E78;
+    --bs-btn-hover-border-color: #0B6E78;
+    --bs-btn-active-bg: #084D55;
+    --bs-btn-active-border-color: #084D55;
+    --bs-btn-disabled-color: #0B6E78;
+    --bs-btn-disabled-border-color: #0B6E78;
+    --bs-btn-focus-shadow-rgb: 11, 110, 120;
+}
+
+.btn-danger {
+    --bs-btn-bg: #B3261E;
+    --bs-btn-border-color: #B3261E;
+    --bs-btn-hover-bg: #961F18;
+    --bs-btn-hover-border-color: #961F18;
+    --bs-btn-active-bg: #861B15;
+    --bs-btn-active-border-color: #861B15;
+    --bs-btn-disabled-bg: #B3261E;
+    --bs-btn-disabled-border-color: #B3261E;
+    --bs-btn-focus-shadow-rgb: 179, 38, 30;
+}
+
+.btn-outline-danger {
+    --bs-btn-color: #B3261E;
+    --bs-btn-border-color: #B3261E;
+    --bs-btn-hover-bg: #B3261E;
+    --bs-btn-hover-border-color: #B3261E;
+    --bs-btn-active-bg: #861B15;
+    --bs-btn-active-border-color: #861B15;
+    --bs-btn-disabled-color: #B3261E;
+    --bs-btn-disabled-border-color: #B3261E;
+    --bs-btn-focus-shadow-rgb: 179, 38, 30;
+}
+
+.btn-outline-secondary {
+    --bs-btn-color: #44525E;
+    --bs-btn-border-color: #C9D1D9;
+    --bs-btn-hover-bg: #E9EEF2;
+    --bs-btn-hover-border-color: #C9D1D9;
+    --bs-btn-hover-color: #1E2A33;
+    --bs-btn-active-bg: #DCE2E8;
+    --bs-btn-active-border-color: #C9D1D9;
+    --bs-btn-active-color: #1E2A33;
+}
+
+/* ---------- Formulare ---------- */
+
+.form-label {
+    font-size: .875rem;
+    font-weight: 500;
+    color: var(--sm-ink-soft);
+    margin-bottom: .375rem;
+}
+
+.form-control,
+.form-select {
+    border-color: var(--sm-line-strong);
+}
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--sm-petrol);
+        box-shadow: 0 0 0 .2rem rgba(11, 110, 120, .18);
+    }
+
+.form-check-input:checked {
+    background-color: var(--sm-petrol);
+    border-color: var(--sm-petrol);
+}
+
+.form-check-input:focus {
+    border-color: var(--sm-petrol);
+    box-shadow: 0 0 0 .2rem rgba(11, 110, 120, .18);
+}
+
+.field-validation-error {
+    font-size: .8125rem;
+}
+
+.input-validation-error {
+    border-color: var(--sm-critical);
+}
+
+/* ---------- Tabellen ---------- */
+
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-border-color: var(--sm-line);
+    --bs-table-hover-bg: rgba(11, 110, 120, .05);
+    --bs-table-hover-color: var(--sm-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+    .table > :not(caption) > * > * {
+        padding: .75rem;
+    }
+
+    .table > thead > tr > th {
+        font-size: .8125rem;
+        font-weight: 500;
+        color: var(--sm-muted);
+        white-space: nowrap;
+        border-bottom: 1px solid var(--sm-line-strong);
+    }
+
+.table-light {
+    --bs-table-bg: #F7F9FA;
+    --bs-table-color: var(--sm-muted);
+    --bs-table-border-color: var(--sm-line);
+}
+
+/* ---------- Karten, Meldungen, Etiketten ---------- */
+
+.card {
+    --bs-card-border-color: var(--sm-line);
+    --bs-card-border-radius: .75rem;
+    --bs-card-inner-border-radius: calc(.75rem - 1px);
+    --bs-card-cap-bg: var(--sm-surface);
+}
+
+.alert {
+    border-radius: .625rem;
+}
+
+.badge {
+    font-weight: 500;
+}
+
+/* ---------- Navigation innerhalb von Seiten ---------- */
+
+.nav-pills {
+    --bs-nav-pills-link-active-bg: #0B6E78;
+}
+
+.pagination {
+    --bs-pagination-color: #0B6E78;
+    --bs-pagination-hover-color: #084D55;
+    --bs-pagination-focus-color: #084D55;
+    --bs-pagination-active-bg: #0B6E78;
+    --bs-pagination-active-border-color: #0B6E78;
+    --bs-pagination-border-color: var(--sm-line);
+}
+
+/* ---------- Bestandsanzeige (wird ab Schritt 22b verwendet) ---------- */
+
+.stock-level {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 5rem;
+    height: .375rem;
+    background: #E3E8ED;
+    border-radius: .25rem;
+}
+
+.stock-level__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: .25rem;
+}
+
+.stock-level__fill--critical {
+    background: var(--sm-critical);
+}
+
+.stock-level__fill--low {
+    background: var(--sm-low);
+}
+
+.stock-level__fill--ok {
+    background: var(--sm-ok);
+}
+
+.stock-level__min {
+    position: absolute;
+    left: 50%;
+    top: -.1875rem;
+    width: 2px;
+    height: .75rem;
+    background: var(--sm-ink);
+}
+
+/* ==========================================================================
+   Rahmen: Seitenleiste und Inhalt 
+   ========================================================================== */
+
+body.app-body {
+    margin-bottom: 0;
+    min-height: 100vh;
+}
+
+.app-shell {
+    min-height: 100vh;
+}
+
+@media (min-width: 992px) {
+    .app-shell {
+        display: grid;
+        grid-template-columns: 15.5rem minmax(0, 1fr);
+    }
+
+    .app-sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--sm-ink);
+    }
+}
+
+.app-offcanvas {
+    --bs-offcanvas-width: 17rem;
+    --bs-offcanvas-bg: var(--sm-ink);
+    --bs-offcanvas-color: #C5D1DA;
+    --bs-offcanvas-border-width: 0;
+}
+
+.app-offcanvas .offcanvas-header {
+    padding: .75rem 1rem 0;
+}
+
+.app-offcanvas .offcanvas-body {
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem .75rem 1rem;
+    overflow-y: auto;
+}
+
+@media (min-width: 992px) {
+    .app-offcanvas .offcanvas-body {
+        flex-grow: 1;
+    }
+}
+
+.app-brand {
+    display: flex;
+    align-items: center;
+    gap: .625rem;
+    padding: .25rem .75rem 1.25rem;
+    color: #FFFFFF;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.app-brand:hover {
+    color: #FFFFFF;
+}
+
+.app-brand svg {
+    width: 1.375rem;
+    height: 1.375rem;
+}
+
+.app-brand--compact {
+    padding: 0;
+    font-size: 1rem;
+}
+
+.app-nav-group {
+    margin: 1.25rem 0 .375rem;
+    padding: 0 .75rem;
+    font-size: .75rem;
+    font-weight: 500;
+    color: #8FA0AD;
+}
+
+.app-nav {
+    display: flex;
+    flex-direction: column;
+    gap: .125rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.app-nav .nav-link,
+.app-side-link,
+.app-user__button {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .5rem .75rem;
+    color: #C5D1DA;
+    font-size: .9375rem;
+    text-decoration: none;
+    background: none;
+    border: 0;
+    border-left: 2px solid transparent;
+    border-radius: 0 .375rem .375rem 0;
+    width: 100%;
+    text-align: left;
+}
+
+.app-nav .nav-link:hover,
+.app-side-link:hover,
+.app-user__button:hover {
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, .06);
+}
+
+.app-nav .nav-link.active,
+.app-side-link.active {
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, .09);
+    border-left-color: #6CC4CC;
+}
+
+.app-nav .nav-link:focus-visible,
+.app-side-link:focus-visible,
+.app-user__button:focus-visible,
+.app-topbar__toggle:focus-visible {
+    outline: 2px solid #6CC4CC;
+    outline-offset: -2px;
+    box-shadow: none;
+}
+
+.app-nav .nav-link svg,
+.app-side-link svg,
+.app-user__button svg {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex: 0 0 auto;
+}
+
+.app-user {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, .12);
+}
+
+.app-user__name {
+    padding: 0 .75rem .5rem;
+    overflow: hidden;
+    color: #C5D1DA;
+    font-size: .8125rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-user__button {
+    font-size: .875rem;
+}
+
+.app-side-link {
+    font-size: .875rem;
+}
+
+.app-content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 100vh;
+}
+
+.app-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .625rem 1rem;
+    background: var(--sm-ink);
+}
+
+.app-topbar__toggle {
+    padding: .25rem;
+    color: #FFFFFF;
+    background: none;
+    border: 0;
+}
+
+.app-main {
+    flex: 1 0 auto;
+    width: 100%;
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+@media (min-width: 992px) {
+    .app-main {
+        padding: 2rem 2.5rem;
+    }
+}
+
+.app-footer {
+    padding: 1rem 1.5rem;
+    color: var(--sm-muted);
+    font-size: .8125rem;
+    border-top: 1px solid var(--sm-line);
+}
+
+.guest-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.guest-header {
+    padding: 1.25rem 1.5rem;
+}
+
+.guest-header .app-brand {
+    padding: 0;
+    color: var(--sm-ink);
+}
+
+.guest-header .app-brand:hover {
+    color: var(--sm-petrol);
+}
+
+.guest-main {
+    flex: 1 0 auto;
+    width: 100%;
+    max-width: 44rem;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+.guest-footer {
+    padding: 1rem 1.5rem;
+    color: var(--sm-muted);
+    font-size: .8125rem;
+    text-align: center;
+}
+
+.guest-footer a {
+    color: var(--sm-muted);
+}
+/* ==========================================================================
+   Bausteine für Seiten (Schritt 22c)
+   ========================================================================== */
+
+.page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 1.625rem;
+}
+
+.page-subtitle {
+    margin: .25rem 0 0;
+    color: var(--sm-muted);
+}
+
+.page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.btn svg {
+    width: 1rem;
+    height: 1rem;
+    vertical-align: -.15em;
+}
+
+.alert svg {
+    flex: 0 0 auto;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin-top: .125rem;
+}
+
+/* Fläche für Tabellen und Formulare */
+
+.panel {
+    background: var(--sm-surface);
+    border: 1px solid var(--sm-line);
+    border-radius: .75rem;
+}
+
+.panel-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--sm-line);
+}
+
+.panel-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.panel-body {
+    padding: 1.25rem;
+}
+
+.panel .table {
+    margin-bottom: 0;
+}
+
+.panel .table > :not(caption) > * > *:first-child {
+    padding-left: 1.25rem;
+}
+
+.panel .table > :not(caption) > * > *:last-child {
+    padding-right: 1.25rem;
+}
+
+.panel .table > tbody > tr:last-child > * {
+    border-bottom: 0;
+}
+
+/* Kennzahlen */
+
+.stat-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 1px;
+    overflow: hidden;
+    background: var(--sm-line);
+    border: 1px solid var(--sm-line);
+    border-radius: .75rem;
+}
+
+.stat {
+    padding: 1rem 1.25rem;
+    background: var(--sm-surface);
+}
+
+.stat__label {
+    color: var(--sm-muted);
+    font-size: .8125rem;
+}
+
+.stat__value {
+    margin: .125rem 0 .375rem;
+    font-size: 1.625rem;
+    font-weight: 600;
+    letter-spacing: -.01em;
+}
+
+.stat__link,
+.stat__hint {
+    font-size: .8125rem;
+}
+
+.stat__hint {
+    color: var(--sm-muted);
+}
+
+.stat--alert .stat__value {
+    color: var(--sm-critical);
+}
+
+/* Leerer Zustand */
+
+.empty-state {
+    padding: 2.5rem 1.25rem;
+    color: var(--sm-muted);
+    text-align: center;
+}
+
+.empty-state svg {
+    width: 2rem;
+    height: 2rem;
+    margin-bottom: .75rem;
+}
+
+.empty-state__title {
+    margin-bottom: .25rem;
+    color: var(--sm-ink);
+    font-weight: 600;
+}
+
+/* Bestandszelle: Zahl und Balken */
+
+.stock-cell {
+    display: flex;
+    align-items: center;
+    gap: .625rem;
+    min-width: 9rem;
+}
+
+.stock-cell__num {
+    min-width: 2.25rem;
+    font-weight: 500;
+    text-align: right;
+}
+
+.stock-cell__num--critical {
+    color: var(--sm-critical);
+}
+/* ==========================================================================
+   Listen: Filterleiste und Zeilenaktionen (Schritt 22d)
+   ========================================================================== */
+
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.filter-search {
+    flex: 1 1 22rem;
+    max-width: 30rem;
+}
+
+.row-links {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: .25rem .875rem;
+    margin-left: .75rem;
+    font-size: .875rem;
+    vertical-align: middle;
+}
+
+.row-links a {
+    text-decoration: none;
+}
+
+.row-links a:hover {
+    text-decoration: underline;
+}
+
+.row-links__danger {
+    color: var(--sm-critical);
+}
+
+.row-links__danger:hover {
+    color: #861B15;
+}
+/* ==========================================================================
+   Korrekturen nach den ersten Bildschirmfotos
+   ========================================================================== */
+
+/* Weiße Flächen: Bootstrap nimmt für Felder und Karten sonst die graue Seitenfarbe. */
+:root {
+    --bs-form-check-bg: #FFFFFF;
+}
+
+.form-control,
+.form-select,
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--sm-surface);
+}
+
+.card {
+    --bs-card-bg: var(--sm-surface);
+}
+
+.pagination {
+    --bs-pagination-bg: var(--sm-surface);
+}
+
+/* Anmeldeformular: nicht zu schmal */
+.guest-main .col-md-6.col-lg-4 {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 24rem;
+}
+
+/* Bestandsbalken: nicht über die ganze Spalte ziehen */
+.stock-cell {
+    max-width: 14rem;
+}
+/* ==========================================================================
+   Detailseiten, Fortschritt, Zurück-Link (Schritt 22e)
+   ========================================================================== */
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .375rem;
+    margin-bottom: 1rem;
+    color: var(--sm-muted);
+    font-size: .875rem;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: var(--sm-petrol);
+}
+
+.back-link svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1.125rem 2rem;
+    margin: 0;
+}
+
+.detail-grid dt {
+    margin-bottom: .125rem;
+    color: var(--sm-muted);
+    font-size: .8125rem;
+    font-weight: 500;
+}
+
+.detail-grid dd {
+    margin: 0;
+}
+
+.detail-grid__wide {
+    grid-column: 1 / -1;
+}
+
+.progress {
+    --bs-progress-height: .375rem;
+    --bs-progress-bg: #E3E8ED;
+    --bs-progress-bar-bg: var(--sm-petrol);
+    --bs-progress-border-radius: .25rem;
+}
+
+.delivery-cell {
+    min-width: 8rem;
+}
+
+.delivery-cell .progress {
+    margin-top: .375rem;
+}
+/* ==========================================================================
+   Formulare (Schritt 22f)
+   ========================================================================== */
+
+/* ASP.NET erzeugt das Fehlerfeld auch ohne Fehler: dann ausblenden. */
+.validation-summary-valid {
+    display: none;
+}
+
+.validation-summary-errors ul {
+    margin: 0;
+    padding-left: 1.125rem;
+}
+
+.form-panel {
+    max-width: 46rem;
+}
+
+.form-panel--narrow {
+    max-width: 32rem;
+}
+
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--sm-line);
+}
+
+.field-hint {
+    margin-top: .25rem;
+    color: var(--sm-muted);
+    font-size: .8125rem;
+}
+/* ==========================================================================
+   Anmeldung (Schritt 22g)
+   ========================================================================== */
+
+.login-card {
+    max-width: 26rem;
+    margin: 2.5rem auto;
+}
+/* ==========================================================================
+   Feinschliff (Schritt 22h)
+   ========================================================================== */
+
+@media (max-width: 575.98px) {
+    .app-main {
+        padding: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.375rem;
+    }
+
+    .page-actions {
+        width: 100%;
+    }
+
+    .page-actions > .btn,
+    .page-actions > form {
+        flex: 1 1 auto;
+    }
+
+    .page-actions > form > .btn {
+        width: 100%;
+    }
+
+    .panel-body {
+        padding: 1rem;
+    }
+
+    .stat-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .form-actions > .btn {
+        flex: 1 1 auto;
+    }
+
+    .filter-search {
+        flex-basis: 100%;
+        max-width: none;
+    }
+
+    .row-links {
+        margin-left: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+    }
+}
+/* ==========================================================================
+   Grundregeln (Korrektur nach der Analyse von site.css)
+   ========================================================================== */
+
+body.app-body {
+    font-family: var(--sm-font);
+    color: var(--sm-ink);
+    background-color: var(--sm-paper);
+}

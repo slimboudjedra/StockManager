@@ -1,4 +1,11 @@
-﻿<!DOCTYPE html>
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+    string Active(string controller) => currentController == controller ? "active" : "";
+}
+<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="utf-8" />
@@ -10,94 +17,172 @@
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/stockmanager.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/StockManager.styles.css" asp-append-version="true" />
 </head>
 
-<body>
-    <header>
-        <nav class="navbar navbar-expand-lg sm-navbar">
-            <div class="container-fluid px-4">
+<body class="app-body">
 
-                <a class="navbar-brand sm-brand"
-                   asp-area=""
-                   asp-controller="Home"
-                   asp-action="Index">
-                    <i data-lucide="package" class="brand-icon"></i>
-                    <span>StockManager</span>
-                </a>
+@if (isAuthenticated)
+{
+    <div class="app-shell">
 
-                <button class="navbar-toggler"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#mainNavbar"
-                        aria-controls="mainNavbar"
-                        aria-expanded="false"
-                        aria-label="Menü anzeigen">
+        <aside class="app-sidebar">
+            <div class="offcanvas-lg offcanvas-start app-offcanvas"
+                 tabindex="-1"
+                 id="appSidebar"
+                 aria-label="Hauptmenü">
 
-                    <i data-lucide="menu"></i>
-                </button>
+                <div class="offcanvas-header">
+                    <button type="button"
+                            class="btn-close btn-close-white ms-auto"
+                            data-bs-dismiss="offcanvas"
+                            data-bs-target="#appSidebar"
+                            aria-label="Menü schließen"></button>
+                </div>
 
-                <div class="collapse navbar-collapse" id="mainNavbar">
+                <div class="offcanvas-body">
 
-                    <ul class="navbar-nav me-auto ms-lg-4">
+                    <a class="app-brand" asp-controller="Home" asp-action="Index">
+                        <i data-lucide="package"></i>
+                        <span>StockManager</span>
+                    </a>
 
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
-                               asp-controller="Home"
-                               asp-action="Index">
-                                <i data-lucide="layout-dashboard"></i>
-                                <span>Dashboard</span>
-                            </a>
-                        </li>
+                    <nav aria-label="Hauptnavigation">
 
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Privacy" ? "active" : "")"
-                               asp-controller="Home"
-                               asp-action="Privacy">
-                                <i data-lucide="shield-check"></i>
-                                <span>Datenschutz</span>
-                            </a>
-                        </li>
+                        <ul class="app-nav">
+                            <li class="nav-item">
+                                <a class="nav-link @(currentController == "Home" && currentAction == "Index" ? "active" : "")"
+                                   asp-controller="Home" asp-action="Index">
+                                    <i data-lucide="layout-dashboard"></i>
+                                    <span>Übersicht</span>
+                                </a>
+                            </li>
+                        </ul>
 
-                    </ul>
+                        <div class="app-nav-group">Lager</div>
+                        <ul class="app-nav">
+                            <li class="nav-item">
+                                <a class="nav-link @Active("Products")"
+                                   asp-controller="Products" asp-action="Index">
+                                    <i data-lucide="boxes"></i>
+                                    <span>Produkte</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @Active("Categories")"
+                                   asp-controller="Categories" asp-action="Index">
+                                    <i data-lucide="tags"></i>
+                                    <span>Kategorien</span>
+                                </a>
+                            </li>
+                        </ul>
 
-                    <div class="navbar-user">
+                        <div class="app-nav-group">Einkauf</div>
+                        <ul class="app-nav">
+                            <li class="nav-item">
+                                <a class="nav-link @Active("Suppliers")"
+                                   asp-controller="Suppliers" asp-action="Index">
+                                    <i data-lucide="truck"></i>
+                                    <span>Lieferanten</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @Active("PurchaseOrders")"
+                                   asp-controller="PurchaseOrders" asp-action="Index">
+                                    <i data-lucide="clipboard-list"></i>
+                                    <span>Bestellungen</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @Active("Reorder")"
+                                   asp-controller="Reorder" asp-action="Index">
+                                    <i data-lucide="shopping-cart"></i>
+                                    <span>Nachbestellvorschlag</span>
+                                </a>
+                            </li>
+                        </ul>
+
+                    </nav>
+
+                    <div class="app-user">
                         <partial name="_LoginPartial" />
+
+                        <a class="app-side-link @(currentAction == "Privacy" ? "active" : "")"
+                           asp-controller="Home" asp-action="Privacy">
+                            <i data-lucide="shield-check"></i>
+                            <span>Datenschutz</span>
+                        </a>
                     </div>
 
                 </div>
             </div>
-        </nav>
-    </header>
+        </aside>
 
-    <div class="sm-page-container">
-        <main role="main" class="sm-main-content">
+        <div class="app-content">
+
+            <header class="app-topbar d-lg-none">
+                <button class="app-topbar__toggle"
+                        type="button"
+                        data-bs-toggle="offcanvas"
+                        data-bs-target="#appSidebar"
+                        aria-controls="appSidebar"
+                        aria-label="Menü öffnen">
+                    <i data-lucide="menu"></i>
+                </button>
+
+                <a class="app-brand app-brand--compact" asp-controller="Home" asp-action="Index">
+                    <i data-lucide="package"></i>
+                    <span>StockManager</span>
+                </a>
+            </header>
+
+            <main role="main" class="app-main">
+                @RenderBody()
+            </main>
+
+            <footer class="app-footer">
+                <span>&copy; @DateTime.Now.Year StockManager</span>
+            </footer>
+
+        </div>
+    </div>
+}
+else
+{
+    <div class="guest-shell">
+
+        <header class="guest-header">
+            <a class="app-brand" asp-controller="Home" asp-action="Index">
+                <i data-lucide="package"></i>
+                <span>StockManager</span>
+            </a>
+        </header>
+
+        <main role="main" class="guest-main">
             @RenderBody()
         </main>
-    </div>
 
-    <footer class="sm-footer">
-        <div class="container-fluid px-4">
+        <footer class="guest-footer">
             <span>&copy; @DateTime.Now.Year StockManager</span>
+            <a asp-controller="Home" asp-action="Privacy" class="ms-3">Datenschutz</a>
+        </footer>
 
-            <a asp-controller="Home" asp-action="Privacy">
-                Datenschutz
-            </a>
-        </div>
-    </footer>
+    </div>
+}
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="~/lib/lucide/lucide.min.js"></script>
 
     <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                if (window.lucide) {
-                    lucide.createIcons();
-                }
-            });
+        document.addEventListener("DOMContentLoaded", function () {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        });
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

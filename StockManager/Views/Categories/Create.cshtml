@@ -1,48 +1,39 @@
-﻿@model StockManager.Models.Category
+@model StockManager.Models.Category
 
 @{
+    Layout = "_PageLayout";
     ViewData["Title"] = "Neue Kategorie";
+    ViewData["Subtitle"] = "Kategorien ordnen die Produkte.";
 }
 
-<h1>Neue Kategorie</h1>
+<a asp-action="Index" class="back-link"><i data-lucide="arrow-left"></i>Alle Kategorien</a>
 
-<hr />
+<form asp-action="Create" method="post" data-submit-once class="panel form-panel form-panel--narrow">
+    <div class="panel-body">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Create" method="post">
-            <div asp-validation-summary="ModelOnly"
-                 class="text-danger"></div>
-
-            <div class="mb-3">
+        <div class="row g-3">
+            <div class="col-12">
                 <label asp-for="Name" class="form-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name"
-                      class="text-danger"></span>
+                <input asp-for="Name" class="form-control" autofocus />
+                <span asp-validation-for="Name" class="text-danger"></span>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="Description"
-                       class="form-label"></label>
-                <textarea asp-for="Description"
-                          class="form-control"
-                          rows="3"></textarea>
-                <span asp-validation-for="Description"
-                      class="text-danger"></span>
+            <div class="col-12">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
             </div>
+        </div>
 
-            <button type="submit" class="btn btn-primary">
-                Speichern
-            </button>
-
-            <a asp-action="Index"
-               class="btn btn-secondary">
-                Abbrechen
-            </a>
-        </form>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Speichern</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Abbrechen</a>
+        </div>
     </div>
-</div>
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <partial name="_SubmitOnce" />
 }

@@ -1,31 +1,21 @@
-﻿ @model ErrorViewModel
+@model StockManager.Models.ErrorViewModel
+
 @{
     ViewData["Title"] = "Fehler";
 }
 
-<div class="container py-5 text-center">
-    <h1 class="text-danger mb-3">Ein Fehler ist aufgetreten.</h1>
-
-    <p class="lead">
-        Bei der Verarbeitung deiner Anfrage ist ein unerwarteter Fehler aufgetreten.
-    </p>
-
-    <p>
-        Bitte versuche es später erneut. Falls das Problem weiterhin besteht,
-        wende dich an den Administrator.
-    </p>
-
-    @if (Model.ShowRequestId)
-    {
-        <p class="text-muted mt-4">
-            <strong>Anfrage-ID:</strong>
-            <code>@Model.RequestId</code>
+<section class="panel form-panel">
+    <div class="panel-body">
+        <h1 class="h4 mb-2">Es ist ein Fehler aufgetreten</h1>
+        <p class="text-secondary">
+            Bei der Verarbeitung Ihrer Anfrage ist ein Problem aufgetreten. Bitte versuchen Sie es erneut.
         </p>
-    }
 
-    <a asp-controller="Home"
-       asp-action="Index"
-       class="btn btn-primary mt-3">
-        Zur Startseite
-    </a>
-</div>
+        @if (Model.ShowRequestId)
+        {
+            <p class="text-secondary small">Anfrage-ID: <code>@Model.RequestId</code></p>
+        }
+
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Zur Startseite</a>
+    </div>
+</section>
