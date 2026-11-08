@@ -44,6 +44,7 @@ builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<SupplierService>();
 builder.Services.AddScoped<PurchaseOrderService>();
 builder.Services.AddScoped<ReorderService>();
+builder.Services.AddScoped<DemoDataSeeder>();
 
 builder.Services.AddControllersWithViews(options =>
 {
@@ -60,7 +61,23 @@ builder.Services.AddControllersWithViews(options =>
 var app = builder.Build();
 
 // NEU: Legt den ersten Administrator an, falls noch kein Benutzer existiert
+// Datenbank beim Start anlegen bzw. auf den neuesten Stand bringen (nur auf Wunsch, z. B. in Docker)
+if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
+    using var migrationScope = app.Services.CreateScope();
+    var migrationContext = migrationScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await migrationContext.Database.MigrateAsync();
+}
 await IdentitySeeder.SeedAdminAsync(app.Services, app.Configuration);
+
+// Demodaten nur auf Wunsch und nur in einer Datenbank ohne Fachdaten
+if (app.Configuration.GetValue<bool>("Seed:DemoData"))
+{
+    using var demoScope = app.Services.CreateScope();
+    var demoSeeder = demoScope.ServiceProvider.GetRequiredService<DemoDataSeeder>();
+    var demoResult = await demoSeeder.SeedAsync();
+    app.Logger.LogInformation("Demodaten: {Message}", demoResult.Message);
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -68,7 +85,11 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Im Container gibt es kein HTTPS: Dort schaltet die Konfiguration die Umleitung ab.
+if (!app.Configuration.GetValue<bool>("Hosting:DisableHttpsRedirection"))
+{
+    app.UseHttpsRedirection();
+}
 app.UseRouting();
 
 app.UseAuthentication();   // NEU: muss VOR UseAuthorization stehen
