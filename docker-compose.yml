@@ -1,0 +1,38 @@
+# StockManager: Demo-Umgebung mit SQL Server und der Anwendung.
+# Start: ".env.example" nach ".env" kopieren, dann "docker compose up --build -d".
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SQL_SA_PASSWORD:?Bitte .env aus .env.example anlegen}
+    volumes:
+      - sqldata:/var/opt/mssql
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$${MSSQL_SA_PASSWORD}" -C -b -Q "SELECT 1"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+
+  web:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Server=db;Database=StockManagerDb;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True;"
+      Database__MigrateOnStartup: "true"
+      Hosting__DisableHttpsRedirection: "true"
+      Seed__DemoData: "${SEED_DEMO_DATA:-true}"
+      Seed__AdminEmail: ${ADMIN_EMAIL:?Bitte .env aus .env.example anlegen}
+      Seed__AdminPassword: ${ADMIN_PASSWORD:?Bitte .env aus .env.example anlegen}
+    ports:
+      - "127.0.0.1:8080:8080"
+    restart: unless-stopped
+
+volumes:
+  sqldata:

@@ -1,0 +1,12 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.git/
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+StockManager.Tests/
+**/*.bak
+**/*.user
