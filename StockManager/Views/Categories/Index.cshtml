@@ -37,10 +37,10 @@
                             <td class="fw-medium">@category.Name</td>
                             <td class="text-secondary">@category.Description</td>
                             <td class="text-end text-nowrap">
-                                <span class="row-links">
-                                    <a asp-action="Details" asp-route-id="@category.Id">Details</a>
-                                    <a asp-action="Edit" asp-route-id="@category.Id">Bearbeiten</a>
-                                    <a asp-action="Delete" asp-route-id="@category.Id" class="row-links__danger">Löschen</a>
+                                <span class="row-actions">
+                                    <a asp-action="Details" asp-route-id="@category.Id" class="icon-btn" title="Details" aria-label="Details"><i data-lucide="eye"></i></a>
+                                    <a asp-action="Edit" asp-route-id="@category.Id" class="icon-btn" title="Bearbeiten" aria-label="Bearbeiten"><i data-lucide="pencil"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@category.Id" class="icon-btn icon-btn--danger" title="Löschen" aria-label="Löschen"><i data-lucide="trash-2"></i></a>
                                 </span>
                             </td>
                         </tr>

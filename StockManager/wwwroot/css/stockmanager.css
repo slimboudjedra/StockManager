@@ -966,3 +966,48 @@ body.app-body {
     color: var(--sm-ink);
     background-color: var(--sm-paper);
 }
+/* ==========================================================================
+   Zeilenaktionen als Symbole und breiterer Inhalt (Schritt 22i)
+   ========================================================================== */
+
+.app-main {
+    max-width: 90rem;
+}
+
+.row-actions {
+    display: inline-flex;
+    gap: .125rem;
+    margin-left: .5rem;
+    vertical-align: middle;
+}
+
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    color: var(--sm-muted);
+    border-radius: .375rem;
+    text-decoration: none;
+}
+
+.icon-btn:hover {
+    color: var(--sm-petrol);
+    background: #E8EDF1;
+}
+
+.icon-btn--danger:hover {
+    color: var(--sm-critical);
+    background: #FBE9E7;
+}
+
+.icon-btn:focus-visible {
+    outline: 2px solid var(--sm-petrol);
+    outline-offset: 1px;
+}
+
+.icon-btn svg {
+    width: 1.125rem;
+    height: 1.125rem;
+}

@@ -103,10 +103,10 @@
                                 }
                                 else
                                 {
-                                    <span class="row-links">
-                                        <a asp-action="Details" asp-route-id="@supplier.Id">Details</a>
-                                        <a asp-action="Edit" asp-route-id="@supplier.Id">Bearbeiten</a>
-                                        <a asp-action="Archive" asp-route-id="@supplier.Id" class="row-links__danger">Archivieren</a>
+                                    <span class="row-actions">
+                                        <a asp-action="Details" asp-route-id="@supplier.Id" class="icon-btn" title="Details" aria-label="Details"><i data-lucide="eye"></i></a>
+                                        <a asp-action="Edit" asp-route-id="@supplier.Id" class="icon-btn" title="Bearbeiten" aria-label="Bearbeiten"><i data-lucide="pencil"></i></a>
+                                        <a asp-action="Archive" asp-route-id="@supplier.Id" class="icon-btn icon-btn--danger" title="Archivieren" aria-label="Archivieren"><i data-lucide="archive"></i></a>
                                     </span>
                                 }
                             </td>

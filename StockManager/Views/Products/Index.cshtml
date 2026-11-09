@@ -78,7 +78,7 @@
                     <tr>
                         <th>Referenz</th>
                         <th>Produkt</th>
-                        <th>Kategorie</th>
+                        <th class="d-none d-xxl-table-cell">Kategorie</th>
                         <th>Bestand</th>
                         <th class="text-end">Mindestbestand</th>
                         <th class="text-end">Einzelpreis</th>
@@ -97,7 +97,7 @@
                                     <div class="text-secondary small">@item.Description</div>
                                 }
                             </td>
-                            <td>@item.Category?.Name</td>
+                            <td class="d-none d-xxl-table-cell">@item.Category?.Name</td>
                             <td>
                                 <partial name="_StockLevel" model="new StockLevelModel(item.Quantity, item.MinimumStock)" />
                             </td>
@@ -106,11 +106,11 @@
                             <td class="text-end text-nowrap">
                                 <a asp-controller="StockMovements" asp-action="Create" asp-route-productId="@item.Id"
                                    class="btn btn-sm btn-outline-primary">Bestand buchen</a>
-                                <span class="row-links">
-                                    <a asp-action="Details" asp-route-id="@item.Id">Details</a>
-                                    <a asp-action="Edit" asp-route-id="@item.Id">Bearbeiten</a>
-                                    <a asp-controller="StockMovements" asp-action="Index" asp-route-productId="@item.Id">Historie</a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="row-links__danger">Archivieren</a>
+                                <span class="row-actions">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="icon-btn" title="Details" aria-label="Details"><i data-lucide="eye"></i></a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="icon-btn" title="Bearbeiten" aria-label="Bearbeiten"><i data-lucide="pencil"></i></a>
+                                    <a asp-controller="StockMovements" asp-action="Index" asp-route-productId="@item.Id" class="icon-btn" title="Historie" aria-label="Historie"><i data-lucide="history"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="icon-btn icon-btn--danger" title="Archivieren" aria-label="Archivieren"><i data-lucide="archive"></i></a>
                                 </span>
                             </td>
                         </tr>
