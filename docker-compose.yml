@@ -1,12 +1,15 @@
 # StockManager: Demo-Umgebung mit SQL Server und der Anwendung.
-# Start: ".env.example" nach ".env" kopieren, dann "docker compose up --build -d".
+# Start: "docker compose up --build -d"
+# Eine ".env"-Datei ist nicht nötig: Ohne sie gelten die öffentlichen Demo-Werte
+# aus ".env.example". Mit einer ".env" überschreiben deren Werte die Voreinstellungen.
 
 services:
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: ${SQL_SA_PASSWORD:?Bitte .env aus .env.example anlegen}
+      MSSQL_SA_PASSWORD: "${SQL_SA_PASSWORD:-Demo-Sql-Passwort-2026!}"
     volumes:
       - sqldata:/var/opt/mssql
     healthcheck:
@@ -24,12 +27,12 @@ services:
         condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__DefaultConnection: "Server=db;Database=StockManagerDb;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True;"
+      ConnectionStrings__DefaultConnection: "Server=db;Database=StockManagerDb;User Id=sa;Password=${SQL_SA_PASSWORD:-Demo-Sql-Passwort-2026!};TrustServerCertificate=True;"
       Database__MigrateOnStartup: "true"
       Hosting__DisableHttpsRedirection: "true"
       Seed__DemoData: "${SEED_DEMO_DATA:-true}"
-      Seed__AdminEmail: ${ADMIN_EMAIL:?Bitte .env aus .env.example anlegen}
-      Seed__AdminPassword: ${ADMIN_PASSWORD:?Bitte .env aus .env.example anlegen}
+      Seed__AdminEmail: "${ADMIN_EMAIL:-demo@stockmanager.example}"
+      Seed__AdminPassword: "${ADMIN_PASSWORD:-Demo-Lager-2026!}"
     ports:
       - "127.0.0.1:8080:8080"
     restart: unless-stopped

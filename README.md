@@ -60,19 +60,25 @@ StockManager ist mein Lern- und Portfolioprojekt: eine vollständige, realistisc
 
 ### Mit Docker (empfohlen)
 
-Voraussetzung: Docker Desktop.
+Voraussetzung: Docker Desktop (Windows, macOS oder Linux). Eine Installation von .NET oder SQL Server ist nicht nötig.
 
 ```bash
 git clone https://github.com/slimboudjedra/StockManager.git
 cd StockManager
-cp .env.example .env        # Windows PowerShell: Copy-Item .env.example .env
 docker compose up --build -d
 ```
 
-Danach <http://localhost:8080> öffnen und mit dem Demo-Konto aus der Datei `.env` anmelden (Voreinstellung: `demo@stockmanager.example` / `Demo-Lager-2026!`). Beim ersten Start legt die Anwendung die Datenbank an und füllt sie mit fiktiven Beispieldaten.
+Danach <http://localhost:8080> öffnen und mit dem Demo-Konto anmelden: `demo@stockmanager.example` / `Demo-Lager-2026!`. Beim ersten Start legt die Anwendung die Datenbank an und füllt sie mit fiktiven Beispieldaten.
 
 Beenden: `docker compose down` (mit `-v` wird auch die Datenbank gelöscht).
 
+**Hinweise**
+
+- **Erster Start:** Er dauert einige Minuten, weil etwa 2 GB heruntergeladen werden (SQL Server und .NET). Spätere Starts dauern Sekunden. Den Fortschritt zeigt `docker compose logs web`.
+- **Apple Silicon (M1 bis M4):** Das SQL-Server-Image ist für x86 gebaut. In Docker Desktop unter *Settings, General* die Option „Use Rosetta for x86_64/amd64 emulation on Apple Silicon“ aktivieren. Startet der Container `db` nicht, liegt es meist daran.
+- **Port 8080 belegt:** In `docker-compose.yml` die Zeile `127.0.0.1:8080:8080` ändern, zum Beispiel auf `127.0.0.1:8081:8080`, und dann <http://localhost:8081> öffnen.
+- **Eigene Passwörter:** `.env.example` nach `.env` kopieren und die Werte anpassen. Ohne `.env` gelten die öffentlichen Demo-Werte.
+- **Die Anwendung ist nur von diesem Rechner aus erreichbar** (`127.0.0.1`), die Datenbank gar nicht von außen.
 ### Ohne Docker (.NET 10 SDK und SQL Server LocalDB)
 
 ```powershell
